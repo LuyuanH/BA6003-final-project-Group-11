@@ -1,11 +1,35 @@
+[build-system]
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "amlens"
+name = "amlens-app"
 version = "0.1.0"
-requires-python = ">=3.13"
+description = "Detect transaction patterns with SQLite. Replay historical results in Streamlit."
+requires-python = ">=3.13,<3.14"
 dependencies = [
-    "ipykernel>=7.3.0",
-    "nbformat>=5.11.1",
-    "pandas>=3.0.6",
-    "plotly>=7.1.0",
-    "pyarrow>=25.0.1",
+    "kagglehub==1.0.2",
+    "streamlit==1.66.0",
 ]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.14,<1"]
+
+[project.scripts]
+amlens = "amlens.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"amlens.components" = ["dashboard/*"]
+"amlens.db" = ["sql/*.sql"]
+"amlens.detection" = ["*.json"]
+"amlens.operations" = ["*.json"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

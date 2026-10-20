@@ -1,0 +1,176 @@
+{
+  "version": "historical-demo-6ed874e77b60",
+  "search_config": {
+    "batch_hours": 6,
+    "windows_hours": [
+      48,
+      96,
+      216
+    ],
+    "max_cycle_hops": 12,
+    "max_path_hops": 4,
+    "max_graph_neighbors": 32,
+    "max_cycle_expansions_per_window": 500000,
+    "max_path_expansions_per_window": 500000,
+    "notes": "Run statistics count excluded branches. RANDOM identifies a path witness. It does not identify a unique generator type."
+  },
+  "rules": [
+    {
+      "rule_id": "fan_in_v1",
+      "family": "FAN-IN",
+      "predicates": [
+        {
+          "feature": "edges",
+          "operator": ">=",
+          "value": 11
+        },
+        {
+          "feature": "max_pair_repeats",
+          "operator": "<=",
+          "value": 1
+        },
+        {
+          "feature": "max_background_incidence",
+          "operator": ">=",
+          "value": 159
+        }
+      ]
+    },
+    {
+      "rule_id": "fan_out_v1",
+      "family": "FAN-OUT",
+      "predicates": [
+        {
+          "feature": "nodes",
+          "operator": ">=",
+          "value": 5
+        },
+        {
+          "feature": "span_hours",
+          "operator": "<=",
+          "value": 12
+        },
+        {
+          "feature": "min_role_ach_fraction",
+          "operator": ">=",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "rule_id": "cycle_v1",
+      "family": "CYCLE",
+      "predicates": [
+        {
+          "feature": "span_hours",
+          "operator": "<=",
+          "value": 168
+        },
+        {
+          "feature": "min_role_ach_fraction",
+          "operator": "<=",
+          "value": 0.3
+        },
+        {
+          "feature": "min_background_incidence",
+          "operator": ">=",
+          "value": 53
+        }
+      ]
+    },
+    {
+      "rule_id": "gather_scatter_v1",
+      "family": "GATHER-SCATTER",
+      "predicates": [
+        {
+          "feature": "currencies",
+          "operator": "<=",
+          "value": 6
+        },
+        {
+          "feature": "span_hours",
+          "operator": "<=",
+          "value": 90
+        },
+        {
+          "feature": "currency_switches",
+          "operator": ">=",
+          "value": 50
+        }
+      ]
+    },
+    {
+      "rule_id": "scatter_gather_v1",
+      "family": "SCATTER-GATHER",
+      "predicates": [
+        {
+          "feature": "edges",
+          "operator": ">=",
+          "value": 12
+        },
+        {
+          "feature": "mean_role_ach_fraction",
+          "operator": ">=",
+          "value": 0.5
+        },
+        {
+          "feature": "edge_node_ratio",
+          "operator": "<=",
+          "value": 1.5
+        }
+      ]
+    },
+    {
+      "rule_id": "stack_v1",
+      "family": "STACK",
+      "predicates": [
+        {
+          "feature": "span_hours",
+          "operator": "<=",
+          "value": 18
+        },
+        {
+          "feature": "min_role_ach_fraction",
+          "operator": "<=",
+          "value": 0.35
+        },
+        {
+          "feature": "internal_max_background",
+          "operator": "<=",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "rule_id": "random_v1",
+      "family": "RANDOM",
+      "predicates": [
+        {
+          "feature": "span_hours",
+          "operator": "<=",
+          "value": 30
+        },
+        {
+          "feature": "mean_role_ach_fraction",
+          "operator": "<=",
+          "value": 0.35
+        },
+        {
+          "feature": "compatible_pairs",
+          "operator": ">=",
+          "value": 3
+        }
+      ]
+    }
+  ],
+  "scope": "This ruleset supports historical replay. Prediction performance on unseen data is unknown.",
+  "input_hashes": {
+    "HI-Small_Trans.csv": "b19d39f515523373f991b689c07e11e7b0b95c17a2c27a87d91584ae16c5b040",
+    "HI-Small_accounts.csv": "786808526e33cfc441212dd6fccda7edfc24172149bed59c6ef59b186836b014",
+    "HI-Small_Patterns.txt": "7636c1d712168139ba0ff90f1b45aac9888d0ad46387084560886f204c03d6e6"
+  },
+  "detector_hashes": {
+    "detector.py": "fc3506eff4acd3f3651c4fa853fbde25940f2157fbd37843dda592eebbc41ba9",
+    "window.sql": "91252fd19694dce2aeee749bff73eb75ed2c7add9a80eca5c426095d464081fc"
+  }
+}

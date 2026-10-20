@@ -1,0 +1,38 @@
+{
+  "ruleset_version": "historical-demo-6ed874e77b60",
+  "frozen_reference": "../pattern-demo-lab/results/sql_recount",
+  "synthetic_equivalence": {
+    "description": "Compare the DuckDB window query and detector with the SQLite query and separate Python detector modules.",
+    "random_seed": 913,
+    "source_edge_count": 350,
+    "cutoffs": [
+      "2022-01-02 00:00:00",
+      "2022-01-03 00:00:00",
+      "2022-01-04 00:00:00"
+    ],
+    "candidate_counts": [
+      486,
+      5223,
+      14119
+    ],
+    "windows_hours": [
+      48,
+      96,
+      216
+    ],
+    "exact_window_rows_match": true,
+    "exact_case_feature_and_identity_match": true,
+    "exact_search_statistics_match": true
+  },
+  "indexed_query_benchmark": {
+    "description": "Compare account index aggregates with full-window records. Compare every returned tuple, including background counts for all payment methods.",
+    "cutoff": "2022-09-07 00:00:00",
+    "window_hours": 216,
+    "raw_ach_rows": 363584,
+    "eligible_edge_rows": 320010,
+    "all_window_seconds": 12.485791833001713,
+    "indexed_seconds": 6.648241666000104,
+    "exact_rows_and_order_match": true,
+    "measurement_note": "Record one local run during another full detection scan of the same source. Use this duration only as a reference."
+  }
+}

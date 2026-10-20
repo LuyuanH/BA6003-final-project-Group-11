@@ -1,0 +1,14 @@
+[server]
+address = "127.0.0.1"
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+# Use the project theme for the Streamlit page.
+[theme]
+base = "light"
+primaryColor = "#334EAC"
+backgroundColor = "#F7F2EB"
+secondaryBackgroundColor = "#D0E3FF"
+textColor = "#081F5C"

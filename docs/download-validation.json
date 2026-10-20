@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "source": "https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml/versions/8",
+  "validation_date": "2026-10-21",
+  "download": "All three files actually fetched into an empty temporary directory, not reused from local inputs.",
+  "source_files_match_original_baseline": true,
+  "sha256": {
+    "HI-Small_Trans.csv": "b19d39f515523373f991b689c07e11e7b0b95c17a2c27a87d91584ae16c5b040",
+    "HI-Small_accounts.csv": "786808526e33cfc441212dd6fccda7edfc24172149bed59c6ef59b186836b014",
+    "HI-Small_Patterns.txt": "7636c1d712168139ba0ff90f1b45aac9888d0ad46387084560886f204c03d6e6"
+  },
+  "normalization": "Patterns only: verify official SHA-256, remove exactly one terminal LF, verify original baseline SHA-256; CSV bytes untouched.",
+  "fresh_sqlite_counts": {
+    "transactions": 5078345,
+    "accounts": 518581,
+    "nodes": 518581
+  },
+  "import_seconds": 34.091,
+  "full_detection_rerun_this_check": false,
+  "full_detection_note": "Frozen detection is unchanged. Original full 71-batch golden verification and relocated small pipeline tests cover detection.",
+  "raw_files_committed_to_git": false
+}

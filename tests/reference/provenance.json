@@ -1,0 +1,75 @@
+{
+  "fixture": "expected-detection.json",
+  "fixture_sha256": "f57c11f578fdeb234910b9ba9fd192da34fed30a5b1482039b5a2b9f9af56183",
+  "canonical_evidence_sha256": "16a98e381548991aa47ae69a9c68361064a16488fb570f31aedd52e6e386b64a",
+  "origin": {
+    "project": "pattern-demo-lab",
+    "producer": "sql_recount.py",
+    "finished_utc": "2026-10-20T19:03:55.828408+00:00",
+    "ruleset_version": "historical-demo-6ed874e77b60",
+    "artifacts": {
+      "results/sql_recount/selected_evidence.parquet": "f6329d021fa4a94188e8f188a091778c28690cac75e1b85d78e704523b3a0ea0",
+      "results/sql_recount/ruleset.json": "ddb66390a60a01cb0bc9a608ffcd4d58b89503ff94b7fd103c444c85cba31f6f",
+      "results/sql_recount/summary.json": "a27439b699b7c9836d0674b892847a3d874f07d1e6f24318675b4292f5d7d287"
+    }
+  },
+  "source_hashes": {
+    "HI-Small_Trans.csv": "b19d39f515523373f991b689c07e11e7b0b95c17a2c27a87d91584ae16c5b040",
+    "HI-Small_accounts.csv": "786808526e33cfc441212dd6fccda7edfc24172149bed59c6ef59b186836b014"
+  },
+  "original_detector_hashes": {
+    "detector.py": "fc3506eff4acd3f3651c4fa853fbde25940f2157fbd37843dda592eebbc41ba9",
+    "window.sql": "91252fd19694dce2aeee749bff73eb75ed2c7add9a80eca5c426095d464081fc"
+  },
+  "expected": {
+    "source_transactions": 5078345,
+    "candidate_rows": 3787421,
+    "batch_count": 71,
+    "first_cutoff": "2022-09-01 06:00:00",
+    "last_cutoff": "2022-09-18 18:00:00"
+  },
+  "per_pattern": [
+    {
+      "pattern": "FAN-IN",
+      "transaction_count": 27,
+      "evidence_set_count": 5
+    },
+    {
+      "pattern": "FAN-OUT",
+      "transaction_count": 47,
+      "evidence_set_count": 12
+    },
+    {
+      "pattern": "CYCLE",
+      "transaction_count": 76,
+      "evidence_set_count": 1148
+    },
+    {
+      "pattern": "GATHER-SCATTER",
+      "transaction_count": 89,
+      "evidence_set_count": 31
+    },
+    {
+      "pattern": "SCATTER-GATHER",
+      "transaction_count": 60,
+      "evidence_set_count": 5
+    },
+    {
+      "pattern": "STACK",
+      "transaction_count": 25,
+      "evidence_set_count": 14
+    },
+    {
+      "pattern": "RANDOM",
+      "transaction_count": 21,
+      "evidence_set_count": 6
+    },
+    {
+      "pattern": "UNION",
+      "transaction_count": 330,
+      "evidence_set_count": 1221
+    }
+  ],
+  "canonicalization": "Use rule_id, family, case_id, and sorted unique transaction_ids. Sort records by rule_id and case_id. Encode json.dumps(value, sort_keys=True, separators=(comma, colon)) as UTF-8. Calculate SHA-256.",
+  "usage": "Use this file for validation only. Detection and the dashboard do not read it. Original file paths identify source records. They are not runtime dependencies."
+}
