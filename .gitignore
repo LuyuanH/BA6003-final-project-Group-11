@@ -1,16 +1,23 @@
-# Virtual environment
+.env
+.env.*
+!.env.example
 .venv/
-
-# Python cache
 __pycache__/
-*.pyc
-
-# Raw and processed data
-data/raw/
-data/processed/
-
-# macOS files
-.DS_Store
-
-# Jupyter checkpoints
+*.py[cod]
 .ipynb_checkpoints/
+data/raw/
+data/processed/*
+data/db/*
+data/exploration/
+/HI-Small_Trans.csv
+/HI-Small_accounts.csv
+/HI-Small_Patterns.txt
+logs/*
+.DS_Store
+.vscode/
+*.code-workspace
+*.jpg
+*.png
+analysis/
+requirements.lock.txt
+AMLens.code-workspace

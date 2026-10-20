@@ -19,6 +19,9 @@ def map_entities(transactions, accounts):
             "Account.1": "To Account"
         }
     )
+    transactions["Timestamp"] = pd.to_datetime(
+        transactions["Timestamp"], format="%Y/%m/%d %H:%M", errors="coerce"
+    )
 
     # Create sender lookup table
     from_lookup = accounts[
@@ -65,4 +68,9 @@ def map_entities(transactions, accounts):
         "Validation failed: row count changed during entity mapping."
     )
 
+    transactions.insert(0, "Transaction_ID", range(1, len(transactions) + 1))
+    transactions["From Entity ID"] = transactions["From Entity ID"].fillna("UNMAPPED")
+    transactions["To Entity ID"] = transactions["To Entity ID"].fillna("UNMAPPED")
+    transactions["From Entity Name"] = transactions["From Entity Name"].fillna("Unmapped account")
+    transactions["To Entity Name"] = transactions["To Entity Name"].fillna("Unmapped account")
     return transactions

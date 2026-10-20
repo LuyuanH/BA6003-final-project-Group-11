@@ -30,8 +30,8 @@ def validate_transactions(df):
     )
 
     # Test 3: Calculate entity mapping coverage
-    from_mapping_rate = df["From Entity ID"].notna().mean()
-    to_mapping_rate = df["To Entity ID"].notna().mean()
+    from_mapping_rate = (df["From Entity ID"] != "UNMAPPED").mean()
+    to_mapping_rate = (df["To Entity ID"] != "UNMAPPED").mean()
 
     print("Validation results")
     print("------------------")
@@ -39,6 +39,8 @@ def validate_transactions(df):
     print(f"Columns: {df.shape[1]}")
     print(f"From Entity mapping rate: {from_mapping_rate:.2%}")
     print(f"To Entity mapping rate: {to_mapping_rate:.2%}")
+    print(f"Positive transaction labels: {int(df['Is Laundering'].sum()):,}")
+    print(f"Timestamp errors: {int(df['Timestamp'].isna().sum()):,}")
     print("Basic validation tests passed.")
 
     return {

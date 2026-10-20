@@ -1,80 +1,61 @@
+"""Run the AMLens pipeline as a module or directly from VS Code."""
+
 import logging
+import sys
+from pathlib import Path
 
-from .load_data import load_raw_data
-from .entity_mapping import map_entities
-from .validation import validate_transactions
+# Direct file execution does not set a package context. Locate src relative
+# to this file so the imports also work when launched from another folder.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    __package__ = "aml_pipeline"
+
 from .build_entity_features import build_entity_features
+from .config import LOG_DIR, PIPELINE_LOG_PATH
+from .entity_mapping import map_entities
+from .cycle_detection import detect_cycles
+from .load_data import load_raw_data
+from .risk_rules import build_alert_evidence, build_alerts
+from .storage import save_pipeline_outputs
+from .validation import validate_transactions
 
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s - %(message)s"
-)
-
-logger = logging.getLogger(__name__)
-
-
-def run_pipeline():
-    """
-    Run the AML data processing pipeline.
-    """
-
-    # Step 1: Load raw data
-    logger.info("Step 1: Loading raw data")
-
-    transactions, accounts = load_raw_data()
-
-    logger.info(
-        f"Loaded {len(transactions):,} transactions "
-        f"and {len(accounts):,} accounts"
+def run_pipeline() -> None:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        handlers=[logging.FileHandler(PIPELINE_LOG_PATH), logging.StreamHandler()],
     )
+    log = logging.getLogger("amlens")
+    try:
+        log.info("Step 1/6: load source CSV files")
+        transactions, accounts = load_raw_data()
+        log.info("Loaded %s transactions and %s account records", f"{len(transactions):,}", f"{len(accounts):,}")
 
-    # Step 2: Map accounts to entities
-    logger.info("Step 2: Mapping accounts to entities")
+        log.info("Step 2/6: map bank accounts to entities")
+        transactions = map_entities(transactions, accounts)
 
-    transactions_with_entities = map_entities(
-        transactions,
-        accounts
-    )
+        log.info("Step 3/6: validate mapped transactions")
+        validate_transactions(transactions)
 
-    logger.info(
-        f"Entity mapping completed: "
-        f"{len(transactions_with_entities):,} transaction rows"
-    )
+        log.info("Step 4/6: build one-row-per-entity features")
+        features = build_entity_features(transactions)
 
-    # Step 3: Validate processed transaction data
-    logger.info("Step 3: Running validation checks")
+        log.info("Step 5/6: detect account cycles and apply six label-blind rules")
+        paths, members, path_evidence = detect_cycles(transactions)
+        log.info("Found %s closed paths", len(paths))
+        alerts, thresholds = build_alerts(features, members)
+        evidence = build_alert_evidence(transactions, alerts)
+        log.info("Created %s alerts with %s evidence rows", f"{len(alerts):,}", f"{len(evidence):,}")
 
-    validation_results = validate_transactions(
-        transactions_with_entities
-    )
-
-    logger.info(
-        f"From Entity mapping rate: "
-        f"{validation_results['from_mapping_rate']:.2%}"
-    )
-
-    logger.info(
-        f"To Entity mapping rate: "
-        f"{validation_results['to_mapping_rate']:.2%}"
-    )
-
-    # Step 4: Build entity-level features
-    logger.info("Step 4: Building entity-level features")
-
-    entity_features = build_entity_features(
-        transactions_with_entities
-    )
-
-    logger.info(
-        f"Entity feature table created: "
-        f"{len(entity_features):,} entities"
-    )
-
-    logger.info("AML pipeline completed successfully")
-
-    return transactions_with_entities, entity_features
+        log.info("Step 6/6: save dashboard outputs")
+        save_pipeline_outputs(transactions, features, alerts, evidence, thresholds,
+                              paths, members, path_evidence)
+        log.info("Pipeline completed successfully")
+    except Exception:
+        log.exception("Pipeline failed")
+        raise
 
 
 if __name__ == "__main__":
