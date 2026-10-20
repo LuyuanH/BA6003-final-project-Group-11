@@ -21,14 +21,14 @@ PATTERN_ORDER = (
     "RANDOM",
 )
 PATTERN_NAMES = (
-    "集中收款",
-    "分散付款",
-    "循环转账",
-    "归集后分散",
-    "分散后归集",
-    "双层互转",
-    "层层转移",
-    "混合路径",
+    "Fan-in",
+    "Fan-out",
+    "Cycle",
+    "Gather-scatter",
+    "Scatter-gather",
+    "Bipartite",
+    "Stack",
+    "Random",
 )
 
 
@@ -55,7 +55,9 @@ class ReplayDataset:
         self.metadata = records["metadata"]
         self.times = [minute_index(timestamp) for timestamp, _ in records["timeline"]]
         if not self.times or not records["batches"]:
-            raise ValueError("原始交易或检测批次为空，请重新准备数据。")
+            raise ValueError(
+                "Source transactions or detection batches are empty. Prepare data again."
+            )
         self.prefix = [0]
         for _, count in records["timeline"]:
             self.prefix.append(self.prefix[-1] + count)
@@ -69,11 +71,20 @@ class ReplayDataset:
         }
         group_ids = {}
         evidence = []
+        self.analysis_evidence = {}
         ordered = sorted(
             records["evidence"],
             key=lambda row: (row["first_trigger"], row["version"], row["case_id"]),
         )
         for row in ordered:
+            # Retain only detector facts needed for analysis, never arbitrary payload fields.
+            self.analysis_evidence[row["case_id"]] = {
+                "rule_id": row["rule_id"],
+                "ruleset_version": row.get("ruleset_version"),
+                "decision_time": row.get("decision_time", row["first_trigger"]),
+                "features": row.get("features", {}),
+                "predicates": row.get("explanation", []),
+            }
             group_key = (row["rule_id"], row["group_id"])
             group_ids.setdefault(group_key, len(group_ids))
             case = EvidenceCase(
@@ -89,7 +100,9 @@ class ReplayDataset:
                 transactions=tuple(row["transaction_ids"]),
             )
             if any(self.transactions[tx]["time"] >= case.discovered for tx in case.transactions):
-                raise ValueError("检测证据包含截止时间之后的交易，拒绝回放。")
+                raise ValueError(
+                    "Detection evidence includes transactions at or after the cutoff. Replay refused."
+                )
             evidence.append(case)
         self.evidence = tuple(evidence)
         identity = {
@@ -123,10 +136,10 @@ class ReplayDataset:
 
     def status(self, case: EvidenceCase, state: dict[str, Any]) -> str:
         review = state["statuses"].get(str(case.id), {})
-        # Apply each review decision to the evidence version that the reviewer saw.
+        # Completed reviews apply to the whole case for this session.
         return (
             review.get("status", "pending")
-            if review.get("evidence_id") == case.evidence_id
+            if review.get("status") == "reviewed" or review.get("evidence_id") == case.evidence_id
             else "pending"
         )
 

@@ -76,6 +76,7 @@ class AppStartupTests(unittest.TestCase):
         self.assertEqual(list(app.exception), [])
         self.assertEqual(list(app.error), [])
         self.assertEqual(app.session_state["amlens_observatory__state"]["cursor"], data.start - 1)
+        self.assertEqual(app.session_state["amlens_observatory__state"]["language"], "en")
 
 
 if __name__ == "__main__":

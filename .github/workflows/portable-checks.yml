@@ -40,8 +40,10 @@ jobs:
           uv run --frozen --extra dev ruff format --check .
       - name: Run unit, database, import, and Streamlit startup tests
         run: uv run --frozen --extra dev python -m unittest discover -s tests -t . -v
-      - name: Validate the frontend event queue
-        run: node tests/frontend/review_queue.test.cjs
+      - name: Validate frontend events and AI report rendering
+        run: |
+          node tests/frontend/review_queue.test.cjs
+          node tests/frontend/analysis.test.cjs
       - name: Build the source distribution and wheel
         run: uv build --out-dir dist
       - name: Validate distribution contents

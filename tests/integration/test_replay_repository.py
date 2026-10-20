@@ -82,14 +82,14 @@ class ReplayRepositoryTests(unittest.TestCase):
         with closing(sqlite3.connect(self.detections)) as connection:
             set_metadata(connection, "status", "running")
             connection.commit()
-        with self.assertRaisesRegex(ValueError, "尚未完成"):
+        with self.assertRaisesRegex(ValueError, "incomplete"):
             read_replay_records(self.observations, self.detections)
 
     def test_replaced_observations_require_redetection(self):
         with closing(sqlite3.connect(self.observations)) as connection:
             connection.execute("UPDATE ingestion_metadata SET value='replacement'")
             connection.commit()
-        with self.assertRaisesRegex(ValueError, "其他数据版本"):
+        with self.assertRaisesRegex(ValueError, "different data version"):
             read_replay_records(self.observations, self.detections)
 
 

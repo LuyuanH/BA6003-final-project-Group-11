@@ -30,9 +30,11 @@ def dashboard_snapshot(data: ReplayDataset, state: dict[str, Any]) -> dict[str, 
         if statuses[evidence.id] != "reviewed":
             held.update(evidence.transactions)
             pattern_transactions[evidence.pattern].update(evidence.transactions)
-    pattern_cases = Counter(case.pattern for case in visible)
+    pattern_cases = Counter(case.pattern for case in visible if statuses[case.id] != "reviewed")
     queue = []
     for case in reversed(visible):
+        if statuses[case.id] == "reviewed":
+            continue
         detail = data.detail(case, statuses[case.id])
         degree = Counter(
             account_key(tx[bank], tx[account])
@@ -71,6 +73,9 @@ def dashboard_snapshot(data: ReplayDataset, state: dict[str, Any]) -> dict[str, 
             (case for case in reversed(visible) if case.pattern == state["pattern"]), None
         )
     detail = data.detail(selected, statuses[selected.id]) if selected else None
+    if detail:
+        review = state["statuses"].get(str(selected.id), {})
+        detail["review"] = review if statuses[selected.id] == "reviewed" else None
     end = int(state["cursor"])
     points = [[state["start"], 0]]
     step = max(1, (end - state["start"]) // 70)
@@ -90,7 +95,7 @@ def dashboard_snapshot(data: ReplayDataset, state: dict[str, Any]) -> dict[str, 
         "hold": len(held),
         "pending": sum(row["status"] == "pending" for row in queue),
         "investigating": sum(row["status"] == "investigating" for row in queue),
-        "reviewed": sum(row["status"] == "reviewed" for row in queue),
+        "reviewed": sum(status == "reviewed" for status in statuses.values()),
         "patterns": [
             {
                 "id": pattern,

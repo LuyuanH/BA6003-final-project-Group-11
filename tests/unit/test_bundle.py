@@ -46,6 +46,8 @@ class BundleTests(unittest.TestCase):
     def test_archive_and_relocated_folder_verify_without_original_paths(self):
         # Make sure the bundle excludes files that belong to the local environment.
         self.write(self.project / ".venv" / "private-file", "local environment")
+        self.write(self.project / ".env", "OPENROUTER_API_KEY=private-key")
+        self.write(self.project / "src" / ".env.local", "OPENROUTER_API_KEY=private-key")
         self.write(self.project / "src" / "amlens" / "__pycache__" / "cache.pyc", "cache")
         report = self.bundle()
         self.assertTrue(report["includes_results"])
@@ -55,6 +57,9 @@ class BundleTests(unittest.TestCase):
             self.assertFalse(
                 any(".venv" in name or "__pycache__" in name for name in archive.namelist())
             )
+            self.assertIn("amlens-app/.env.example", archive.namelist())
+            self.assertNotIn("amlens-app/.env", archive.namelist())
+            self.assertNotIn("amlens-app/src/.env.local", archive.namelist())
             archive.extractall(relocated)
         extracted = relocated / "amlens-app"
         self.assertTrue(verify_bundle(extracted)["passed"])
@@ -67,6 +72,21 @@ class BundleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "scripts/reproduce.py"):
             self.bundle()
         self.assertFalse(self.output.exists())
+
+    def test_missing_ai_runtime_files_prevent_export(self):
+        for relative in (
+            "src/amlens/analysis/client.py",
+            "src/amlens/analysis/overview.py",
+            "src/amlens/analysis/prompt.txt",
+            "src/amlens/analysis/overview_prompt.txt",
+            "src/amlens/components/dashboard/analysis.js",
+        ):
+            path = self.project / relative
+            self.write(path, "runtime fixture")
+            path.unlink()
+            with self.subTest(relative=relative), self.assertRaisesRegex(ValueError, relative):
+                project_bundle_files(self.project, self.data)
+            self.write(path, "runtime fixture")
 
     def test_all_raw_files_and_both_result_databases_are_required(self):
         for relative in (
@@ -182,9 +202,15 @@ class BundleTests(unittest.TestCase):
         self.assertFalse(report["passed"])
         self.assertIn("Changed file: README.md", report["failures"])
 
-    def test_manifest_cannot_hide_missing_database_or_required_script(self):
+    def test_manifest_cannot_hide_missing_runtime_files(self):
         self.bundle()
-        for relative in ("data/processed/detection.sqlite", "scripts/reproduce.py"):
+        for relative in (
+            "data/processed/detection.sqlite",
+            "scripts/reproduce.py",
+            "src/amlens/analysis/overview_prompt.txt",
+            "src/amlens/analysis/session.py",
+            "src/amlens/components/dashboard/analysis.js",
+        ):
             extracted = self.root / relative.replace("/", "_")
             with zipfile.ZipFile(self.output) as archive:
                 archive.extractall(extracted)

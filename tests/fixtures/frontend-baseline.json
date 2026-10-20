@@ -1,0 +1,254 @@
+{
+  "source": "../../src/amlens/components/dashboard",
+  "files": {
+    "index.html": "567c00fa48233713ca79de8bde30dcd476c285ccd6b986968d041ce191b0245f",
+    "styles.css": "a128a30006f195549c415d07d63ab8a02002542e959d7566e2418ae91d232b42",
+    "script.js": "91e228a97a66ad52e0678271976d366e7308837c1fe272479d19b3983390e24e",
+    "i18n.js": "a2a5b76cbfd5fab52d79c2cb9872705553694d38721854043ac9dae58eb3a816",
+    "echarts.min.js": "baa8dfe7e1d9336b98e8986ba7e20ea15e7cdbea1ef42a59d59478632fa45a1d"
+  },
+  "integration_changes": [
+    "script.js"
+  ],
+  "captured_at": "2026-10-20T19:37:24.698609+00:00",
+  "source_thread": "01a15a6e-77c0-7c52-9bb4-686245a0a759",
+  "source_revision_note": "Copy the completed investigation card layout, CSS heights, and graph configuration from the source.",
+  "authorized_content_replacements": {
+    "index.html": [
+      {
+        "before": "<p class=\"analysis-footnote\" data-i18n=\"insightFootnote\"></p>",
+        "after": "<p class=\"analysis-footnote\" data-role=\"insight-footnote\" data-i18n=\"insightFootnote\" hidden></p>",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "<div><h2 id=\"insight-heading\" data-i18n=\"insightTitle\"></h2><p class=\"insight-subtitle\" data-i18n=\"insightSubtitle\"></p></div>",
+        "after": "<h2 id=\"insight-heading\" data-i18n=\"insightTitle\"></h2>",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "</div></div>\n<section class=\"investigation\"",
+        "after": "</div>\n<section class=\"card analysis-card insight-card\" aria-labelledby=\"insight-heading\">\n<div class=\"card-head\"><div><h2 id=\"insight-heading\" data-i18n=\"insightTitle\"></h2><p class=\"insight-subtitle\" data-i18n=\"insightSubtitle\"></p></div><button class=\"primary\" data-action=\"overview_insight\" data-role=\"insight-generate\" data-i18n=\"insightGenerate\"></button></div>\n<p class=\"analysis-meta\" data-role=\"insight-meta\"></p><p class=\"analysis-notice\" data-role=\"insight-notice\" role=\"status\" hidden></p>\n<div data-role=\"insight-body\" aria-live=\"polite\" aria-atomic=\"true\"></div><p class=\"insight-stale\" data-role=\"insight-stale\" data-i18n=\"insightStale\" hidden></p>\n<p class=\"analysis-footnote\" data-i18n=\"insightFootnote\"></p>\n</section></div>\n<section class=\"investigation\"",
+        "reason": "Add the requested on-demand overview AI Insight card with snapshot-based aggregate analysis."
+      },
+      {
+        "before": "<div class=\"playback\" data-aria=\"timeControls\"><div class=\"replay-clock\"><div class=\"clock-line\"><strong data-role=\"clock\">00:00</strong><span data-role=\"day\"></span><span class=\"play-state\"><i class=\"live-dot\"></i><span data-role=\"play-state\"></span></span></div></div><div class=\"playback-settings\"><div class=\"start-date\"><span data-i18n=\"startDate\"></span><strong data-role=\"start-date\"></strong></div><select class=\"speed\" data-aria=\"speed\" data-role=\"speed\"><option value=\"900\">900×</option><option value=\"3600\">3,600×</option><option value=\"14400\">14,400×</option><option value=\"28800\">28,800×</option></select><button class=\"primary play\" data-action=\"play\" data-role=\"play\"></button></div></div></section>",
+        "after": "<div class=\"playback\" data-aria=\"timeControls\"><div class=\"replay-clock\"><span data-role=\"day\"></span><strong data-role=\"clock\">00:00</strong></div><div class=\"playback-settings\"><select class=\"speed\" data-aria=\"speed\" data-role=\"speed\"><option value=\"900\">900×</option><option value=\"3600\">3,600×</option><option value=\"14400\">14,400×</option><option value=\"28800\">28,800×</option></select><button class=\"primary play\" data-action=\"play\" data-role=\"play\"></button></div></div></section>",
+        "reason": "Remove duplicate replay dates and status labels and align the toolbar controls, as requested on 2026-10-21."
+      },
+      {
+        "before": "<section class=\"card evidence-card\">",
+        "after": "<section class=\"card analysis-card\" aria-labelledby=\"analysis-heading\"><div class=\"card-head\"><h2 id=\"analysis-heading\" data-i18n=\"aiTitle\"></h2><span class=\"analysis-meta\" data-role=\"analysis-meta\"></span></div><p class=\"analysis-notice\" data-role=\"analysis-notice\" role=\"status\" hidden></p><div data-role=\"analysis-body\" aria-live=\"polite\" aria-atomic=\"true\"></div><p class=\"analysis-footnote\" data-i18n=\"aiFootnote\"></p></section>\n<section class=\"card evidence-card\">",
+        "reason": "Connect Start investigation to session-scoped OpenRouter case analysis as requested on 2026-10-21."
+      },
+      {
+        "before": "<button class=\"secondary\" data-action=\"status\" data-value=\"investigating\" data-i18n=\"startInvestigation\"></button>",
+        "after": "<button class=\"secondary\" data-action=\"analyze\" data-role=\"analyze\" data-i18n=\"startInvestigation\"></button>",
+        "reason": "Connect Start investigation to session-scoped OpenRouter case analysis as requested on 2026-10-21."
+      },
+      {
+        "before": "<section class=\"investigation\" data-role=\"investigation\" hidden>\n<div class=\"case-bar\"><div class=\"case-identity\"><button class=\"text-button\" data-action=\"overview\" data-i18n=\"back\"></button><span class=\"case-title\" data-role=\"case-title\"></span><span class=\"badge\" data-role=\"case-status\"></span></div><div class=\"case-actions\"><button class=\"secondary\" data-action=\"status\" data-value=\"investigating\" data-i18n=\"startInvestigation\"></button><button class=\"primary\" data-action=\"status\" data-value=\"reviewed\" data-i18n=\"finishReview\"></button><button class=\"secondary\" data-action=\"status\" data-value=\"pending\" data-role=\"reopen\" data-i18n=\"reopen\" hidden></button></div></div>\n<div class=\"detail-grid\"><section class=\"card network-card detail-network-card\"><div class=\"card-head\"><h2 data-i18n=\"paths\"></h2><button class=\"dark-button\" data-role=\"clear-account\" data-i18n=\"allAccounts\"></button></div><div class=\"network detail-network\" data-role=\"detail-network\" role=\"img\" data-aria=\"pathsAria\"></div><div class=\"network-bottom\"><span data-role=\"detail-summary\"></span><span data-i18n=\"pathHint\"></span></div></section><aside class=\"card account-card\"><div class=\"card-head\"><h2 data-role=\"account-title\"></h2></div><div data-role=\"account-info\"></div></aside></div>\n",
+        "after": "<section class=\"investigation\" data-role=\"investigation\" hidden>\n<div class=\"case-bar\"><div class=\"case-identity\"><button class=\"text-button\" data-action=\"overview\" data-i18n=\"back\"></button><span class=\"case-title\" data-role=\"case-title\"></span><span class=\"badge\" data-role=\"case-status\"></span></div><div class=\"case-actions\"><button class=\"secondary\" data-action=\"status\" data-value=\"investigating\" data-i18n=\"startInvestigation\"></button><button class=\"primary\" data-role=\"finish-review\" data-i18n=\"finishReview\"></button><button class=\"secondary\" data-action=\"status\" data-value=\"pending\" data-role=\"reopen\" data-i18n=\"reopen\" hidden></button></div></div>\n<section class=\"card review-summary\" data-role=\"review-summary\" hidden><h2 data-i18n=\"reviewConclusion\"></h2><strong data-role=\"review-type\"></strong><p data-role=\"review-comment\"></p></section>\n<div class=\"detail-grid\"><section class=\"card network-card detail-network-card\"><div class=\"card-head\"><h2 data-i18n=\"paths\"></h2><button class=\"dark-button\" data-role=\"clear-account\" data-i18n=\"allAccounts\"></button></div><div class=\"network detail-network\" data-role=\"detail-network\" role=\"img\" data-aria=\"pathsAria\"></div><div class=\"network-bottom\"><span data-role=\"detail-summary\"></span><span data-i18n=\"pathHint\"></span></div></section><aside class=\"card account-card\"><div class=\"card-head\"><h2 data-role=\"account-title\"></h2></div><div data-role=\"account-info\"></div></aside></div>\n",
+        "reason": "Add the requested completion review form and result display."
+      },
+      {
+        "before": "<footer class=\"page-footer\"><span data-role=\"footer-time\"></span></footer><div class=\"connection-message\" data-role=\"connection-message\" data-i18n=\"connection\" hidden></div>\n</main>\n",
+        "after": "<footer class=\"page-footer\"><span data-role=\"footer-time\"></span></footer><div class=\"connection-message\" data-role=\"connection-message\" data-i18n=\"connection\" hidden></div>\n<dialog class=\"review-dialog\" data-role=\"review-dialog\" aria-labelledby=\"review-title\">\n<form data-role=\"review-form\">\n<h2 id=\"review-title\" data-i18n=\"finishReview\"></h2><p data-role=\"review-case\"></p>\n<label><span data-i18n=\"reviewComment\"></span><textarea data-role=\"review-input\" rows=\"5\" required></textarea></label>\n<label><span data-i18n=\"fraudType\"></span><select data-role=\"review-select\" required></select></label>\n<p data-role=\"review-error\" class=\"review-error\" role=\"alert\" hidden></p>\n<div class=\"review-actions\"><button type=\"button\" class=\"secondary\" data-role=\"review-cancel\" data-i18n=\"cancelReview\"></button><button type=\"submit\" class=\"primary\" data-role=\"review-submit\" data-i18n=\"submitReview\"></button></div>\n</form></dialog>\n</main>\n",
+        "reason": "Add the requested completion review form and result display."
+      },
+      {
+        "before": "<section class=\"workspace-head\"><div class=\"workspace-title\"><h1 data-i18n=\"heading\"></h1><div class=\"playback-settings\"><label class=\"date-select\"><span data-i18n=\"startDate\"></span><select data-aria=\"startDate\" data-role=\"start-date\"></select></label><button class=\"icon-button\" data-action=\"reset\" data-aria=\"reset\" data-title=\"reset\">↺</button><select class=\"speed\" data-aria=\"speed\" data-role=\"speed\"><option value=\"900\">900×</option><option value=\"3600\">3,600×</option><option value=\"14400\">14,400×</option><option value=\"28800\">28,800×</option></select><button class=\"next-button\" data-action=\"next\" data-title=\"nextTitle\" data-i18n=\"next\"></button></div></div>\n<div class=\"playback\" data-aria=\"timeControls\"><div class=\"replay-clock\"><div class=\"clock-line\"><strong data-role=\"clock\">00:00</strong><span data-role=\"day\"></span><span class=\"play-state\"><i class=\"live-dot\"></i><span data-role=\"play-state\"></span></span></div><input type=\"range\" data-aria=\"seek\" data-role=\"seek\" step=\"1\"></div><button class=\"primary play\" data-action=\"play\" data-role=\"play\"></button></div></section>\n",
+        "after": "<section class=\"workspace-head\"><div class=\"workspace-title\"><h1 data-i18n=\"heading\"></h1></div>\n<div class=\"playback\" data-aria=\"timeControls\"><div class=\"replay-clock\"><div class=\"clock-line\"><strong data-role=\"clock\">00:00</strong><span data-role=\"day\"></span><span class=\"play-state\"><i class=\"live-dot\"></i><span data-role=\"play-state\"></span></span></div></div><div class=\"playback-settings\"><div class=\"start-date\"><span data-i18n=\"startDate\"></span><strong data-role=\"start-date\"></strong></div><select class=\"speed\" data-aria=\"speed\" data-role=\"speed\"><option value=\"900\">900×</option><option value=\"3600\">3,600×</option><option value=\"14400\">14,400×</option><option value=\"28800\">28,800×</option></select><button class=\"primary play\" data-action=\"play\" data-role=\"play\"></button></div></div></section>\n",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "<option value=\"14400\">14,400×</option>",
+        "after": "<option value=\"14400\">14,400×</option><option value=\"28800\">28,800×</option>",
+        "reason": "Add the requested 28,800x replay speed on 2026-10-21. Keep the existing layout and style."
+      }
+    ],
+    "i18n.js": [
+      {
+        "before": "insightFootnote:'基于大盘快照的 AI 辅助分析。命中交易模式不代表已确认欺诈。结果仅在本次会话保留。'",
+        "after": "insightFootnote:'AI 辅助意见，请核实后判断。'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightStale:'大盘数据已更新。当前内容仍基于原快照，可点击更新洞察分析最新数据。'",
+        "after": "insightStale:'数据已更新，可重新生成洞察。'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightNoData:'请先开始回放，积累交易数据后生成大盘洞察。'",
+        "after": "insightNoData:'开始回放后可生成洞察。'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightEmpty:'分析近期交易变化、检测模式分布与值得优先查看的案例。每条发现都会附上所依据的指标。'",
+        "after": "insightEmpty:'查看交易变化与复核重点。'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightFootnote:'AI assistance based on a frozen overview snapshot. Pattern matches are not confirmed fraud. Results stay in this session.'",
+        "after": "insightFootnote:'AI-assisted. Verify findings before acting.'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightStale:'The dashboard has changed since this snapshot. Refresh insight to analyze the latest data.'",
+        "after": "insightStale:'New data available. Refresh for the latest insight.'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightNoData:'Start replay to collect transaction data for an overview insight.'",
+        "after": "insightNoData:'Start replay to enable insights.'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "insightEmpty:'Generate an overview of recent transaction activity, the detected pattern mix, and cases worth inspecting next. Each finding links to the metrics used.'",
+        "after": "insightEmpty:'Find patterns and review priorities.'",
+        "reason": "Shorten overview insight copy as requested; show snapshot details only with an analysis."
+      },
+      {
+        "before": "  zh: {\n",
+        "after": "  zh: {\n    insightTitle:'AI 洞察', insightSubtitle:'基于大盘的交易走势、模式分布与复核重点。', insightGenerate:'生成洞察', insightRefresh:'更新洞察', insightRetry:'重试洞察', insightRunning:'正在分析大盘…', insightScope:'基于当前回放时点的完整大盘，包含筛选条件之外的案例。', insightAsOf:'数据快照 {date} · {model}', insightEmpty:'分析近期交易变化、检测模式分布与值得优先查看的案例。每条发现都会附上所依据的指标。', insightNoData:'请先开始回放，积累交易数据后生成大盘洞察。', insightStale:'大盘数据已更新。当前内容仍基于原快照，可点击更新洞察分析最新数据。', insightFootnote:'基于大盘快照的 AI 辅助分析。命中交易模式不代表已确认欺诈。结果仅在本次会话保留。', insightFocus:'建议查看的案例', insightChecks:'建议核查', insightLimits:'范围与限制', insightDetected:'检测涉及交易', insightObserved:'已发现案例', insightActiveCases:'待复核案例', insightRecent:'最近六小时交易量', insightPrevious:'此前六小时交易量',\n",
+        "reason": "Add the requested on-demand overview AI Insight card with snapshot-based aggregate analysis."
+      },
+      {
+        "before": "  en: {\n",
+        "after": "  en: {\n    insightTitle:'AI Insight', insightSubtitle:'Transaction flow, pattern distribution, and review priorities across the overview.', insightGenerate:'Generate insight', insightRefresh:'Refresh insight', insightRetry:'Retry insight', insightRunning:'Analyzing overview…', insightScope:'Uses the full overview at the current replay time, including cases outside your filters.', insightAsOf:'Snapshot {date} · {model}', insightEmpty:'Generate an overview of recent transaction activity, the detected pattern mix, and cases worth inspecting next. Each finding links to the metrics used.', insightNoData:'Start replay to collect transaction data for an overview insight.', insightStale:'The dashboard has changed since this snapshot. Refresh insight to analyze the latest data.', insightFootnote:'AI assistance based on a frozen overview snapshot. Pattern matches are not confirmed fraud. Results stay in this session.', insightFocus:'Cases to inspect', insightChecks:'Suggested checks', insightLimits:'Scope and limitations', insightDetected:'Detected transactions', insightObserved:'Cases observed', insightActiveCases:'Active cases', insightRecent:'Transactions · recent 6 hours', insightPrevious:'Transactions · previous 6 hours',\n",
+        "reason": "Add the requested on-demand overview AI Insight card with snapshot-based aggregate analysis."
+      },
+      {
+        "before": "AI is not configured. Set OPENROUTER_API_KEY and AMLENS_AI_MODEL in the server environment.",
+        "after": "AI is not configured. Set OPENROUTER_API_KEY and AMLENS_AI_MODEL in the project root .env, then refresh the page.",
+        "reason": "Explain the requested project-root .env configuration for OpenRouter on 2026-10-21."
+      },
+      {
+        "before": "尚未配置 AI。请在启动服务的环境中设置 OPENROUTER_API_KEY 和 AMLENS_AI_MODEL。",
+        "after": "尚未配置 AI。请在项目根目录的 .env 中填写 OPENROUTER_API_KEY 和 AMLENS_AI_MODEL，然后刷新页面。",
+        "reason": "Explain the requested project-root .env configuration for OpenRouter on 2026-10-21."
+      },
+      {
+        "before": "    pending:'Pending', investigating:'Investigating', reviewed:'Reviewed'",
+        "after": "    aiTitle:'AI analysis', aiRunning:'Analyzing…', aiRerun:'Analyze again', aiRetry:'Retry analysis', aiVersion:'Evidence version {version}', aiMeta:'{model} · Evidence version {version}',\n    aiEmpty:'This evidence version has not been analyzed. Select “Start investigation” to assess whether the evidence supports money-laundering suspicion.', aiRunningHint:'Analyzing this evidence. You can inspect transactions or switch cases while waiting.', aiFootnote:'AI assistance based on this case evidence. You make the final review decision. Results are kept only in this session.',\n    aiSupporting:'Evidence supporting suspicion', aiCounter:'Counter-evidence and limitations', aiPattern:'Pattern review', aiNormal:'Possible normal explanations (unverified)', aiMissing:'Missing information', aiNext:'Suggested checks', aiNoFindings:'No findings with evidence references identified.', aiNoItems:'No additional items listed.', aiTransaction:'Transaction #{id}',\n    aiAssessment_supported_suspicion:'Evidence supports suspicion', aiAssessment_weak_support:'Weak support', aiAssessment_insufficient_evidence:'Insufficient evidence', aiPattern_matches:'Consistent', aiPattern_partial:'Partly consistent', aiPattern_unsupported:'Pattern unsupported', aiPattern_insufficient_evidence:'Insufficient evidence',\n    aiError_configuration:'AI is not configured. Set OPENROUTER_API_KEY and AMLENS_AI_MODEL in the server environment.', aiError_stale:'Evidence has changed. Select “Start investigation” again to analyze the current version.', aiError_busy:'An analysis is already running in this session. Wait for it to finish before starting another.', aiError_authentication:'OpenRouter authentication failed. Check the local key and permissions, then retry.', aiError_credits:'Insufficient OpenRouter credit. Check the account balance, then retry.', aiError_rate_limit:'OpenRouter rate limit reached. Please retry later.', aiError_timeout:'Analysis exceeded 120 seconds. Please retry.', aiError_context_limit:'This case exceeds the model context capacity. Configure a model with a larger context window, then retry.', aiError_model_support:'Check the model ID and its support for JSON Schema structured output.', aiError_unavailable:'The analysis service is unavailable. Please retry.', aiError_invalid_output:'The AI response was incomplete, invalid, or cited evidence outside this case. Please retry.', aiError_network:'Cannot connect to OpenRouter. Check the network, then retry.',\n    pending:'Pending', investigating:'Investigating', reviewed:'Reviewed'",
+        "reason": "Connect Start investigation to session-scoped OpenRouter case analysis as requested on 2026-10-21."
+      },
+      {
+        "before": "    pending:'待复核', investigating:'调查中', reviewed:'已复核'",
+        "after": "    aiTitle:'AI 分析', aiRunning:'分析中…', aiRerun:'重新分析', aiRetry:'重试分析', aiVersion:'证据版本 {version}', aiMeta:'{model} · 证据版本 {version}',\n    aiEmpty:'当前证据版本尚未分析。点击右上角「开始调查」，评估现有证据是否支持洗钱嫌疑。', aiRunningHint:'正在分析当前证据；你可以继续查看交易或切换案例。', aiFootnote:'基于当前案例证据的 AI 辅助意见，最终复核由你完成。结果仅在本次会话保留。',\n    aiSupporting:'支持嫌疑的证据', aiCounter:'反证与限制', aiPattern:'交易模式复核', aiNormal:'可能的正常解释（待核实）', aiMissing:'缺失的信息', aiNext:'建议核查事项', aiNoFindings:'未识别到有证据引用的发现。', aiNoItems:'未列出其他事项。', aiTransaction:'交易 #{id}',\n    aiAssessment_supported_suspicion:'现有证据支持嫌疑', aiAssessment_weak_support:'支持较弱', aiAssessment_insufficient_evidence:'证据不足', aiPattern_matches:'符合', aiPattern_partial:'部分符合', aiPattern_unsupported:'不支持当前模式', aiPattern_insufficient_evidence:'证据不足',\n    aiError_configuration:'尚未配置 AI。请在启动服务的环境中设置 OPENROUTER_API_KEY 和 AMLENS_AI_MODEL。', aiError_stale:'证据已更新，请再次点击「开始调查」分析当前版本。', aiError_busy:'本次会话已有分析任务运行中，完成后可发起下一次分析。', aiError_authentication:'OpenRouter 身份验证失败，请检查本地密钥和访问权限后重试。', aiError_credits:'OpenRouter 额度不足，请检查账户额度后重试。', aiError_rate_limit:'OpenRouter 请求受限，请稍后重试。', aiError_timeout:'分析超过 120 秒，请重试。', aiError_context_limit:'当前案例超过模型上下文容量，请配置支持更长上下文的模型后重试。', aiError_model_support:'请检查模型 ID，以及该模型是否支持 JSON Schema 结构化输出。', aiError_unavailable:'分析服务暂不可用，请重试。', aiError_invalid_output:'AI 返回的分析不完整、格式不正确或引用了不存在的证据，请重试。', aiError_network:'无法连接 OpenRouter，请检查网络后重试。',\n    pending:'待复核', investigating:'调查中', reviewed:'已复核'",
+        "reason": "Connect Start investigation to session-scoped OpenRouter case analysis as requested on 2026-10-21."
+      },
+      {
+        "before": "    account:'账户', txTime:'交易时间', payer:'付款账户 / 实体', payee:'收款账户 / 实体', paid:'付款金额', received:'收款金额', paymentFormat:'交易方式', sourceRows:'交易流水行号', payerId:'付款实体编号', payeeId:'收款实体编号', expand:'展开交易 {n}', collapse:'收起交易 {n}', selectAccount:'查看账户 {account}', connection:'连接暂未响应，请稍后重试。',\n    pending:'待复核', investigating:'调查中', reviewed:'已复核'\n",
+        "after": "    account:'账户', txTime:'交易时间', payer:'付款账户 / 实体', payee:'收款账户 / 实体', paid:'付款金额', received:'收款金额', paymentFormat:'交易方式', sourceRows:'交易流水行号', payerId:'付款实体编号', payeeId:'收款实体编号', expand:'展开交易 {n}', collapse:'收起交易 {n}', selectAccount:'查看账户 {account}', connection:'连接暂未响应，请稍后重试。',\n    reviewConclusion:'复核结论', reviewComment:'评价（必填）', fraudType:'欺诈类型（必选）', chooseFraudType:'请选择类型', nonFraud:'非欺诈／误报', cancelReview:'取消', submitReview:'提交', submittingReview:'提交中…', reviewInvalid:'请填写评价并选择有效的欺诈类型。', reviewTimeout:'提交暂未确认，请重试。',\n    pending:'待复核', investigating:'调查中', reviewed:'已复核'\n",
+        "reason": "Add the requested completion review form and result display."
+      },
+      {
+        "before": "    account:'Account', txTime:'Transaction time', payer:'Payer account / Entity', payee:'Payee account / Entity', paid:'Amount paid', received:'Amount received', paymentFormat:'Payment method', sourceRows:'Transaction row', payerId:'Payer entity ID', payeeId:'Payee entity ID', expand:'Expand transaction {n}', collapse:'Collapse transaction {n}', selectAccount:'View account {account}', connection:'Connection is not responding. Please try again shortly.',\n    pending:'Pending', investigating:'Investigating', reviewed:'Reviewed'\n",
+        "after": "    account:'Account', txTime:'Transaction time', payer:'Payer account / Entity', payee:'Payee account / Entity', paid:'Amount paid', received:'Amount received', paymentFormat:'Payment method', sourceRows:'Transaction row', payerId:'Payer entity ID', payeeId:'Payee entity ID', expand:'Expand transaction {n}', collapse:'Collapse transaction {n}', selectAccount:'View account {account}', connection:'Connection is not responding. Please try again shortly.',\n    reviewConclusion:'Review conclusion', reviewComment:'Comment (required)', fraudType:'Fraud type (required)', chooseFraudType:'Select a type', nonFraud:'Non-fraud / False positive', cancelReview:'Cancel', submitReview:'Submit', submittingReview:'Submitting…', reviewInvalid:'Enter a comment and select a valid fraud type.', reviewTimeout:'Submission has not been confirmed. Please retry.',\n    pending:'Pending', investigating:'Investigating', reviewed:'Reviewed'\n",
+        "reason": "Add the requested completion review form and result display."
+      },
+      {
+        "before": "waitHint:'Start replay or skip to the next event'",
+        "after": "waitHint:'Start replay and wait for a detection batch'",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "waitHint:'开始回放，或跳到下一事件'",
+        "after": "waitHint:'开始回放，等待检测批次完成'",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "startDate:'Start date', reset:'Reset replay', speed:'Replay speed', next:'Next event ⇥', nextTitle:'Skip to the next case', seek:'Replay progress',",
+        "after": "startDate:'Start date', speed:'Replay speed',",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "startDate:'起始日期', reset:'重置回放', speed:'回放速度', next:'下一事件 ⇥', nextTitle:'跳到下一案例', seek:'回放进度',",
+        "after": "startDate:'起始日期', speed:'回放速度',",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "// Presentation-only vocabulary: source identifiers and stored records are unchanged.",
+        "after": "// Translate display text. Keep source identifiers and stored records unchanged.",
+        "reason": "Rewrite the comment in simplified technical English. Keep page behavior and display text unchanged."
+      },
+      {
+        "before": "  const lang=language==='en'?'en':'zh', zh=lang==='zh', copy=COPY[lang];",
+        "after": "  const lang=language==='zh'?'zh':'en', zh=lang==='zh', copy=COPY[lang];",
+        "reason": "Default to English while retaining Chinese as an explicit language choice, as requested on 2026-10-21."
+      }
+    ],
+    "styles.css": [
+      {
+        "before": "@media(max-width:900px){.analysis-columns{grid-template-columns:minmax(0,1fr);gap:0}.investigation .analysis-card{padding:18px}}\n",
+        "after": "@media(max-width:900px){.analysis-columns{grid-template-columns:minmax(0,1fr);gap:0}.investigation .analysis-card{padding:18px}}\n\n/* Overview insights retain their capture time as replay continues. */\n.insight-card{margin:24px 0 20px;padding:24px;background:var(--light);border:1px solid var(--line)}\n.insight-card .card-head{align-items:center;flex-wrap:wrap}.insight-card .card-head>div{flex:1;min-width:220px}\n.insight-card .insight-subtitle{margin:6px 0 0;font-size:14px;color:var(--mut);line-height:1.5}\n.insight-card .analysis-meta{margin:14px 0 0;font-size:12px}.insight-card .analysis-footnote{border-top:1px solid var(--line);padding-top:14px;margin:18px 0 0;font-size:12px}\n.insight-empty{padding:18px 0 4px;color:var(--mut);max-width:820px}.insight-findings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px;margin-top:20px}\n.insight-findings h3{font-size:16px;margin:0}.insight-findings p{margin:8px 0}.insight-metrics{display:flex;flex-wrap:wrap;gap:6px}\n.insight-metric{font-size:12px;line-height:1.5;padding:4px 8px;border:1px solid var(--line);border-radius:6px;color:var(--mut)}\n.insight-focus{margin-top:24px}.insight-focus h3{font-size:16px;margin:0 0 8px}.insight-case{display:flex;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.insight-case p{margin:0}.insight-case button{flex-shrink:0}\n.insight-stale{border-left:3px solid var(--mid);padding-left:12px;font-size:13px;color:var(--mut)}\n@media(max-width:900px){.insight-findings{grid-template-columns:1fr}.insight-card{padding:20px}.insight-case{flex-wrap:wrap;gap:6px}}\n",
+        "reason": "Add the requested on-demand overview AI Insight card with snapshot-based aggregate analysis."
+      },
+      {
+        "before": "@media(max-width:900px){.topbar{gap:10px}.brand{font-size:23px}nav{gap:12px}.nav{font-size:14px}.language-switch button{padding:5px 7px}.clock-line{flex-wrap:wrap;gap:6px 9px}.metrics{gap:12px}.metric{padding:0 12px}.metric-label{font-size:15px}.number{font-size:34px}.main-grid,.bottom-grid,.detail-grid{grid-template-columns:1fr}.patterns-card{height:366px}.pattern-row{grid-template-columns:160px 1fr 40px}.account-card{height:auto}.evidence-wrap table{min-width:1000px}.case-actions{flex-wrap:wrap}.network-bottom{font-size:13px}}",
+        "after": "@media(max-width:900px){.topbar{gap:10px}.brand{font-size:23px}nav{gap:12px}.nav{font-size:14px}.language-switch button{padding:5px 7px}.replay-clock{gap:10px}.metrics{gap:12px}.metric{padding:0 12px}.metric-label{font-size:15px}.number{font-size:34px}.main-grid,.bottom-grid,.detail-grid{grid-template-columns:1fr}.patterns-card{height:366px}.pattern-row{grid-template-columns:160px 1fr 40px}.account-card{height:auto}.evidence-wrap table{min-width:1000px}.case-actions{flex-wrap:wrap}.network-bottom{font-size:13px}}",
+        "reason": "Remove duplicate replay dates and status labels and align the toolbar controls, as requested on 2026-10-21."
+      },
+      {
+        "before": "@media(max-width:1300px){.topbar-tools{gap:14px}.team{display:none}.main-grid,.bottom-grid,.detail-grid{grid-template-columns:minmax(0,1.7fr) minmax(385px,1fr)}.playback{gap:12px 18px}.playback-settings{gap:10px}.clock-line{gap:9px}.clock-line strong{font-size:28px}.case-bar>div{gap:12px}.case-title{font-size:20px}.case-actions .primary,.case-actions .secondary{padding-left:12px;padding-right:12px}.network-bottom{font-size:12px}.queue-table th:nth-child(2){width:26%}.queue-table th:nth-child(5){width:25%}}",
+        "after": "@media(max-width:1300px){.topbar-tools{gap:14px}.team{display:none}.main-grid,.bottom-grid,.detail-grid{grid-template-columns:minmax(0,1.7fr) minmax(385px,1fr)}.playback{gap:12px 18px}.playback-settings{gap:10px}.replay-clock{gap:10px}.case-bar>div{gap:12px}.case-title{font-size:20px}.case-actions .primary,.case-actions .secondary{padding-left:12px;padding-right:12px}.network-bottom{font-size:12px}.queue-table th:nth-child(2){width:26%}.queue-table th:nth-child(5){width:25%}}",
+        "reason": "Remove duplicate replay dates and status labels and align the toolbar controls, as requested on 2026-10-21."
+      },
+      {
+        "before": "h1{font-size:28px;letter-spacing:-.6px;font-weight:700}h2{font-size:20px;letter-spacing:-.3px;font-weight:700}.workspace-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 0}.workspace-title{min-width:0}.playback-settings{display:flex;align-items:center;flex-wrap:wrap;gap:12px}.start-date{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:8px;white-space:nowrap}.start-date strong{font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}.speed{background:transparent;border:0;font-size:15px;padding:5px 0;width:92px}.playback{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px 24px;margin-left:auto;min-width:0}.replay-clock{min-width:0}.clock-line{display:flex;align-items:baseline;gap:13px;white-space:nowrap}.clock-line strong{font-size:31px;letter-spacing:-1px;font-weight:800;font-variant-numeric:tabular-nums}.clock-line>span{font-size:13px}.play-state{display:flex;align-items:center;gap:6px;color:var(--mut)}.live-dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}.primary{background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:10px;font-weight:600;font-size:15px;min-height:43px}.primary:hover{background:var(--blue);color:var(--paper)}.play{min-width:128px}.secondary{border:1px solid var(--line);border-radius:10px;padding:10px 15px;font-size:15px;min-height:43px}",
+        "after": "h1{font-size:28px;letter-spacing:-.6px;font-weight:700}h2{font-size:20px;letter-spacing:-.3px;font-weight:700}.workspace-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:20px 0}.workspace-title{min-width:0}.playback-settings{display:flex;align-items:center;gap:10px}.speed{height:43px;width:110px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:transparent;font-size:14px;font-variant-numeric:tabular-nums}.playback{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px 18px;margin-left:auto;min-width:0}.replay-clock{display:flex;align-items:center;gap:12px;min-height:43px;white-space:nowrap;font-variant-numeric:tabular-nums}.replay-clock>span{font-size:14px;color:var(--mut)}.replay-clock strong{font-size:20px;line-height:1;font-weight:700;letter-spacing:-.3px}.primary{background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:10px;font-weight:600;font-size:15px;min-height:43px}.primary:hover{background:var(--blue);color:var(--paper)}.play{display:inline-flex;align-items:center;justify-content:center;height:43px;min-width:128px;padding:0 16px}.play:disabled{opacity:1;background:var(--light);color:var(--blue)}.secondary{border:1px solid var(--line);border-radius:10px;padding:10px 15px;font-size:15px;min-height:43px}",
+        "reason": "Remove duplicate replay dates and status labels and align the toolbar controls, as requested on 2026-10-21."
+      },
+      {
+        "before": "@media(max-width:1100px){\n  .investigation .detail-grid{grid-template-columns:minmax(0,1fr)}\n  .investigation .detail-grid>.account-card{min-height:0}\n  .investigation .case-bar{align-items:stretch;flex-direction:column}\n  .investigation .case-actions{margin-left:0}\n  .investigation .expanded-info{grid-template-columns:repeat(2,minmax(0,1fr))}\n}\n\n.review-dialog{border:1px solid var(--line);border-radius:18px;background:#F7F2EB;color:#081F5C;padding:28px;width:min(520px,calc(100vw - 40px));max-height:85vh;overflow:auto;box-sizing:border-box}\n.review-dialog::backdrop{background:rgba(8,31,92,.45)}\n.review-dialog h2{margin:0 0 12px}.review-dialog label{display:grid;gap:8px;margin:20px 0;font-size:15px}\n.review-dialog textarea,.review-dialog select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #7096D1;border-radius:8px;background:#fff;color:#081F5C;font:inherit}\n.review-dialog textarea{resize:vertical}.review-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}.review-error{color:#9c2929}.review-summary{padding:20px;margin-bottom:20px}.review-summary h2{font-size:16px;margin:0 0 12px}.review-summary p{white-space:pre-wrap;overflow-wrap:anywhere}.review-dialog button:disabled{opacity:.55;cursor:wait}\n",
+        "after": "@media(max-width:1100px){\n  .investigation .detail-grid{grid-template-columns:minmax(0,1fr)}\n  .investigation .detail-grid>.account-card{min-height:0}\n  .investigation .case-bar{align-items:stretch;flex-direction:column}\n  .investigation .case-actions{margin-left:0}\n  .investigation .expanded-info{grid-template-columns:repeat(2,minmax(0,1fr))}\n}\n\n.review-dialog{border:1px solid var(--line);border-radius:18px;background:#F7F2EB;color:#081F5C;padding:28px;width:min(520px,calc(100vw - 40px));max-height:85vh;overflow:auto;box-sizing:border-box}\n.review-dialog::backdrop{background:rgba(8,31,92,.45)}\n.review-dialog h2{margin:0 0 12px}.review-dialog label{display:grid;gap:8px;margin:20px 0;font-size:15px}\n.review-dialog textarea,.review-dialog select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #7096D1;border-radius:8px;background:#fff;color:#081F5C;font:inherit}\n.review-dialog textarea{resize:vertical}.review-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}.review-error{color:#9c2929}.review-summary{padding:20px;margin-bottom:20px}.review-summary h2{font-size:16px;margin:0 0 12px}.review-summary p{white-space:pre-wrap;overflow-wrap:anywhere}.review-dialog button:disabled{opacity:.55;cursor:wait}\n\n/* Evidence-bound AI review uses the existing dashboard palette. */\n.investigation .analysis-card{margin-top:24px;padding:24px;border:1px solid var(--line);background:var(--light)}\n.analysis-meta,.analysis-muted,.analysis-footnote{color:var(--mut)}\n.analysis-meta{font-size:13px;overflow-wrap:anywhere}.analysis-card p{margin:12px 0;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}\n.analysis-conclusion{margin-top:20px}.analysis-verdict{display:inline-block;font-size:18px;font-weight:650;border-left:3px solid var(--ink);padding-left:12px}\n.analysis-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}\n.analysis-section{min-width:0;padding-top:20px}.analysis-section h3{font-size:15px;font-weight:650;margin:0 0 10px}.analysis-section ul{padding-left:20px;margin:10px 0}.analysis-section li{line-height:1.7;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap}\n.analysis-finding{margin-bottom:18px}.analysis-refs{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.analysis-reference{border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:5px;font:inherit;font-size:13px;padding:4px 9px;cursor:pointer}.analysis-reference:hover,.analysis-reference:focus-visible{background:var(--ink);color:var(--paper)}.analysis-feature{font-size:12px;color:var(--mut);overflow-wrap:anywhere}\n.analysis-pattern{border-top:1px solid var(--line);margin-top:10px}.analysis-footnote{font-size:13px;border-top:1px solid var(--line);padding-top:14px;margin-bottom:0!important}\n.analysis-notice,.analysis-error{border-left:3px solid var(--ink);padding:8px 12px;background:var(--paper)}\n.analysis-progress{display:flex;align-items:center;gap:12px}.analysis-dot{display:inline-block;flex:0 0 8px;height:8px;border-radius:50%;background:var(--ink);animation:analysis-pulse 1.4s ease-in-out infinite}@keyframes analysis-pulse{50%{opacity:.3}}\n@media(max-width:900px){.analysis-columns{grid-template-columns:minmax(0,1fr);gap:0}.investigation .analysis-card{padding:18px}}\n",
+        "reason": "Connect Start investigation to session-scoped OpenRouter case analysis as requested on 2026-10-21."
+      },
+      {
+        "before": "}\n",
+        "after": "}\n\n.review-dialog{border:1px solid var(--line);border-radius:18px;background:#F7F2EB;color:#081F5C;padding:28px;width:min(520px,calc(100vw - 40px));max-height:85vh;overflow:auto;box-sizing:border-box}\n.review-dialog::backdrop{background:rgba(8,31,92,.45)}\n.review-dialog h2{margin:0 0 12px}.review-dialog label{display:grid;gap:8px;margin:20px 0;font-size:15px}\n.review-dialog textarea,.review-dialog select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #7096D1;border-radius:8px;background:#fff;color:#081F5C;font:inherit}\n.review-dialog textarea{resize:vertical}.review-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}.review-error{color:#9c2929}.review-summary{padding:20px;margin-bottom:20px}.review-summary h2{font-size:16px;margin:0 0 12px}.review-summary p{white-space:pre-wrap;overflow-wrap:anywhere}.review-dialog button:disabled{opacity:.55;cursor:wait}\n",
+        "reason": "Add the requested completion review form and result display."
+      },
+      {
+        "before": ".workspace-title{align-items:flex-start;flex-direction:column}.metrics{gap:12px}",
+        "after": ".clock-line{flex-wrap:wrap;gap:6px 9px}.metrics{gap:12px}",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": ".workspace-head{align-items:stretch;flex-direction:column;gap:14px}.workspace-title{flex-direction:row;align-items:center;justify-content:space-between}.playback{padding-left:0;border-left:0;justify-content:flex-end}.replay-clock{flex:1}",
+        "after": ".workspace-head{align-items:stretch;flex-direction:column;gap:10px}.playback{margin-left:0;justify-content:space-between}",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": ".playback{gap:14px;padding-left:18px}.playback-settings{gap:10px}.replay-clock{min-width:270px}.clock-line{gap:9px}",
+        "after": ".playback{gap:12px 18px}.playback-settings{gap:10px}.clock-line{gap:9px}",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": ".replay-clock input{display:block;height:16px;width:100%;margin:7px 0 0;accent-color:var(--ink);cursor:pointer}.primary{",
+        "after": ".primary{",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": ".workspace-title{display:flex;flex-direction:column;gap:13px;min-width:0}.playback-settings{display:flex;align-items:center;gap:14px}.date-select{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:10px}.date-select select{padding:5px 5px 5px 0;border:0;background:transparent;font-size:15px;font-weight:600;color:var(--ink)}.icon-button{font-size:26px;padding:0 3px}.speed{background:transparent;border:0;font-size:15px;padding:5px 0;width:92px}.next-button{font-size:15px;padding:6px 0}.playback{display:flex;align-items:center;gap:20px;padding-left:24px;border-left:1px solid var(--line)}.replay-clock{min-width:300px}",
+        "after": ".workspace-title{min-width:0}.playback-settings{display:flex;align-items:center;flex-wrap:wrap;gap:12px}.start-date{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:8px;white-space:nowrap}.start-date strong{font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}.speed{background:transparent;border:0;font-size:15px;padding:5px 0;width:92px}.playback{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px 24px;margin-left:auto;min-width:0}.replay-clock{min-width:0}",
+        "reason": "Remove inactive replay controls and group the start date, speed, and start button in a compact toolbar, as requested on 2026-10-21."
+      },
+      {
+        "before": "/* Improve contrast and add 2px to the overview network captions. */",
+        "after": "/* Increase contrast and add 2 px to the overview network caption size. */",
+        "reason": "Rewrite the comment in simplified technical English. Keep page behavior and display text unchanged."
+      },
+      {
+        "before": "/* Compact overview spacing without reducing body/control/table text sizes. */",
+        "after": "/* Reduce overview spacing. Keep text sizes for content, controls, and tables. */",
+        "reason": "Rewrite the comment in simplified technical English. Keep page behavior and display text unchanged."
+      },
+      {
+        "before": "/* Match overview typography. Each grid row follows its tallest card,\n   preserving aligned card bottoms without an arbitrary minimum height. */",
+        "after": "/* Use the overview text style. Set each grid row to the tallest card height.\n   Keep card bottoms aligned without a fixed minimum height. */",
+        "reason": "Rewrite the comment in simplified technical English. Keep page behavior and display text unchanged."
+      }
+    ]
+  }
+}

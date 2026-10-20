@@ -11,14 +11,15 @@ def initial_state(data: ReplayDataset, now: float | None = None) -> dict[str, An
         "start": data.start,
         "cursor": float(data.start - 1),
         "playing": False,
-        "speed": 3600,
+        "speed": 28800,
         "anchor": time.monotonic() if now is None else now,
         "selected": None,
         "view": "overview",
         "pattern": "",
-        "language": "zh",
+        "language": "en",
         "ui": {},
         "statuses": {},
+        "review_result": None,
         "revision": 0,
         "seen": [],
     }
@@ -65,7 +66,39 @@ def apply_action(
             state["selected"], state["view"] = value, "detail"
     elif action == "overview":
         state["view"] = "overview"
-    elif action == "status" and value in ("pending", "investigating", "reviewed"):
+    elif action == "complete_review":
+        result = {"id": packet["id"], "ok": False, "error": "reviewInvalid"}
+        if isinstance(value, dict):
+            case_id = value.get("caseId")
+            comment = value.get("comment")
+            fraud_type = value.get("fraudType")
+            evidence = next(
+                (
+                    case
+                    for case in data.discovered_evidence(state["cursor"])
+                    if case.id == case_id
+                    and type(case_id) is int
+                    and case.evidence_id == packet.get("evidenceId")
+                ),
+                None,
+            )
+            if (
+                evidence
+                and isinstance(comment, str)
+                and comment.strip()
+                and (fraud_type in (*PATTERN_ORDER, "NON_FRAUD"))
+            ):
+                previous = state["statuses"].get(str(case_id), {})
+                if previous.get("status") != "reviewed":
+                    state["statuses"][str(case_id)] = {
+                        "status": "reviewed",
+                        "evidence_id": evidence.evidence_id,
+                        "comment": comment.strip(),
+                        "fraud_type": fraud_type,
+                    }
+                result.update(ok=True, error=None)
+        state["review_result"] = result
+    elif action == "status" and value in ("pending", "investigating"):
         case = next((case for case in data.visible(state) if case.id == state["selected"]), None)
         # New evidence can arrive after a click and before the server receives the event.
         if case is not None and packet.get("evidenceId") == case.evidence_id:

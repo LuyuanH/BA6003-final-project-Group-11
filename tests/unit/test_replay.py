@@ -111,17 +111,89 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(snapshot["processed"], 8)
         self.assertEqual(self.data.end, minute_index("2022-09-01 18:00:00"))
 
-    def test_new_evidence_resets_review_and_rejects_stale_review(self):
+    def complete(self, evidence="first", **fields):
+        self.action(
+            "complete_review",
+            {
+                "caseId": 0,
+                "comment": "  Checked evidence  ",
+                "fraudType": "NON_FRAUD",
+                **fields,
+            },
+            evidenceId=evidence,
+        )
+
+    def test_review_removes_case_for_session_and_can_be_reopened(self):
+        self.state["cursor"] = minute_index("2022-09-01 06:00:00")
+        self.action("open", 0)
+        self.complete()
+        snapshot = dashboard_snapshot(self.data, self.state)
+        self.assertEqual(snapshot["queue"], [])
+        self.assertEqual(snapshot["hold"], 0)
+        self.assertEqual(snapshot["reviewed"], 1)
+        self.assertEqual(snapshot["patterns"][0]["cases"], 0)
+        self.assertEqual(snapshot["detail"]["review"]["comment"], "Checked evidence")
+        self.assertEqual(snapshot["detail"]["review"]["fraud_type"], "NON_FRAUD")
+        self.state["cursor"] = self.data.end
+        snapshot = dashboard_snapshot(self.data, self.state)
+        self.assertEqual(snapshot["pending"], 0)
+        self.assertEqual(snapshot["hold"], 0)
+        self.assertEqual(snapshot["queue"], [])
+        self.assertEqual(snapshot["detail"]["evidenceId"], "second")
+        self.action("status", "pending", evidenceId="second")
+        self.assertEqual(len(dashboard_snapshot(self.data, self.state)["queue"]), 1)
+        self.assertEqual(dashboard_snapshot(self.data, self.state)["reviewed"], 0)
+        fresh = initial_state(self.data, 0)
+        fresh["cursor"] = self.data.end
+        self.assertEqual(dashboard_snapshot(self.data, fresh)["pending"], 1)
+
+    def test_completion_binds_original_case_and_evidence_during_tick(self):
+        self.state["cursor"] = self.data.end
+        self.complete()
+        self.assertTrue(self.state["review_result"]["ok"])
+        self.assertEqual(self.state["statuses"]["0"]["evidence_id"], "first")
+        self.complete(comment="Duplicate")
+        self.assertEqual(self.state["statuses"]["0"]["comment"], "Checked evidence")
+
+    def test_review_requires_valid_form_and_discovered_evidence(self):
         self.state["cursor"] = minute_index("2022-09-01 06:00:00")
         self.action("open", 0)
         self.action("status", "reviewed", evidenceId="first")
-        self.assertEqual(dashboard_snapshot(self.data, self.state)["hold"], 0)
-        self.state["cursor"] = minute_index("2022-09-01 12:00:00")
-        self.assertEqual(dashboard_snapshot(self.data, self.state)["pending"], 1)
-        self.action("status", "reviewed", evidenceId="first")
-        self.assertEqual(dashboard_snapshot(self.data, self.state)["pending"], 1)
-        self.action("status", "reviewed", evidenceId="second")
-        self.assertEqual(dashboard_snapshot(self.data, self.state)["reviewed"], 1)
+        self.assertEqual(self.state["statuses"], {})
+        for fields in (
+            {"comment": " \n "},
+            {"comment": None},
+            {"fraudType": "invalid"},
+            {"caseId": 99},
+            {"caseId": True},
+            {"caseId": 0.0},
+            {"caseId": "0"},
+        ):
+            self.complete(**fields)
+            self.assertFalse(self.state["review_result"]["ok"])
+            self.assertEqual(self.state["statuses"], {})
+        self.complete("second")
+        self.assertFalse(self.state["review_result"]["ok"])
+        self.complete("missing")
+        self.assertFalse(self.state["review_result"]["ok"])
+
+    def test_shared_transactions_stay_held_by_other_cases(self):
+        records = fixture_records()
+        records["evidence"].append(
+            {
+                **records["evidence"][0],
+                "case_id": "other",
+                "group_id": "other",
+            }
+        )
+        self.data = ReplayDataset(records)
+        self.state = initial_state(self.data, 0)
+        self.state["cursor"] = self.data.end
+        self.complete()
+        snapshot = dashboard_snapshot(self.data, self.state)
+        self.assertEqual(snapshot["hold"], 2)
+        self.assertEqual(len(snapshot["queue"]), 1)
+        self.assertEqual(snapshot["reviewed"], 1)
 
     def test_all_groups_are_visible_without_per_pattern_cap(self):
         records = fixture_records()
@@ -137,6 +209,7 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(snapshot["patterns"][0]["cases"], 20)
 
     def test_forward_only_navigation_keeps_replay_running(self):
+        self.action("speed", 3600)
         self.action("play")
         self.action("tick", now=10)
         cursor = self.state["cursor"]
@@ -165,6 +238,7 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(self.state, before)
 
     def test_no_future_open_or_detail_and_no_implicit_pause(self):
+        self.action("speed", 3600)
         self.action("open", 0)
         self.assertIsNone(self.state["selected"])
         self.action("play")
@@ -197,7 +271,7 @@ class ReplayTests(unittest.TestCase):
     def test_future_evidence_fails_closed(self):
         records = fixture_records()
         records["evidence"][0]["first_trigger"] = "2022-09-01 02:00:00"
-        with self.assertRaisesRegex(ValueError, "截止时间"):
+        with self.assertRaisesRegex(ValueError, "cutoff"):
             ReplayDataset(records)
 
     def test_bipartite_is_explicitly_not_enabled(self):

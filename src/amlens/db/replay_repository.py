@@ -22,7 +22,7 @@ def read_replay_records(observations: Path, detections: Path) -> dict[str, Any]:
             for row in connection.execute("SELECT key, value FROM metadata")
         }
         if metadata.get("status") != "complete":
-            raise ValueError("检测结果尚未完成，请先运行 scripts/detect_patterns.py。")
+            raise ValueError("Detection is incomplete. Run scripts/detect_patterns.py first.")
         batches = [dict(row) for row in connection.execute("SELECT * FROM batches ORDER BY cutoff")]
         evidence = [
             {**json.loads(row["payload_json"]), **dict(row)}
@@ -42,7 +42,9 @@ def read_replay_records(observations: Path, detections: Path) -> dict[str, Any]:
         ]
         signature = hashlib.sha256(json.dumps(manifest).encode()).hexdigest()
         if metadata.get("observation_signature") != signature:
-            raise ValueError("检测结果来自其他数据版本，请重新运行 scripts/detect_patterns.py。")
+            raise ValueError(
+                "Detection results use a different data version. Rerun scripts/detect_patterns.py."
+            )
         # Group rows by the indexed timestamp to keep one timeline entry per minute.
         timeline = [
             (row[0], row[1])
@@ -86,7 +88,10 @@ def read_replay_records(observations: Path, detections: Path) -> dict[str, Any]:
                 }
             )
     if len(transactions) != len(ids):
-        raise ValueError("检测结果与原始数据库不一致，部分交易不存在，请重新执行离线检测。")
+        raise ValueError(
+            "Detection results reference transactions missing from the source database. "
+            "Rerun offline detection."
+        )
     return {
         "metadata": metadata,
         "batches": batches,

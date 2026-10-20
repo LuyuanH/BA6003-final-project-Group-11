@@ -14,3 +14,4 @@ prune artifacts
 prune build
 prune dist
 global-exclude __pycache__ *.py[cod] *.sqlite *.sqlite-* *.duckdb *.db *.log .DS_Store .env .env.*
+include .env.example

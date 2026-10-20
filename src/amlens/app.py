@@ -18,7 +18,7 @@ st.html("""<style>
 [data-testid="stVerticalBlock"]{gap:0}footer{display:none}
 </style>""")
 if not OBSERVATION_DB.exists() or not RESULTS_DB.exists():
-    st.error("请先准备原始数据库与离线检测结果，再开始历史检测结果回放。")
+    st.error("Prepare the source database and offline detection results before starting replay.")
     st.code("uv run python scripts/prepare_data.py\nuv run python scripts/detect_patterns.py")
     st.stop()
 try:

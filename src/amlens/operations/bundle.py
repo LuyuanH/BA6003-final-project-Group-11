@@ -22,6 +22,7 @@ SOURCE_FILES_TO_COPY = (
     ".gitignore",
     ".gitattributes",
     "MANIFEST.in",
+    ".env.example",
 )
 SOURCE_DIRECTORIES = ("src", "scripts", "tests", "docs", ".streamlit", ".github")
 RESULT_FILES = ("amlens.sqlite", "detection.sqlite")
@@ -36,12 +37,24 @@ REQUIRED_SOURCE_GROUPS = {
         "export_portable.py",
         "prepare_data.py",
         "reproduce.py",
+        "verify_ablation.py",
         "verify_bundle.py",
         "verify_detection.py",
     ),
     "src/amlens": ("__init__.py", "app.py", "cli.py", "config.py", "presenters.py"),
+    "src/amlens/analysis": (
+        "__init__.py",
+        "client.py",
+        "context.py",
+        "overview.py",
+        "overview_prompt.txt",
+        "prompt.txt",
+        "response.py",
+        "session.py",
+    ),
     "src/amlens/components": ("__init__.py", "observatory.py"),
     "src/amlens/components/dashboard": (
+        "analysis.js",
         "echarts.min.js",
         "i18n.js",
         "index.html",
@@ -138,6 +151,8 @@ def _source_files(project_root: Path) -> dict[str, Path]:
                 path.suffix in (".pyc", ".pyo")
                 or path.name == ".DS_Store"
                 or path.name.startswith(".bundle-")
+                or path.name == ".env"
+                or path.name.startswith(".env.")
             ):
                 continue
             if path.is_symlink():

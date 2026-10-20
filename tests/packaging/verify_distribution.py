@@ -26,6 +26,7 @@ REQUIRED_ROOT_FILES = (
     ".gitignore",
     ".gitattributes",
     "MANIFEST.in",
+    ".env.example",
     ".streamlit/config.toml",
 )
 EXCLUDED_PARTS = {
@@ -55,7 +56,8 @@ def excluded(name: str) -> bool:
     path = PurePosixPath(name)
     return bool(set(path.parts) & EXCLUDED_PARTS) or (
         path.suffix in {".pyc", ".pyo", ".sqlite", ".db", ".duckdb", ".log"}
-        or path.name.startswith((".env", ".DS_Store"))
+        or (path.name.startswith(".env") and name != ".env.example")
+        or path.name.startswith(".DS_Store")
         or ".sqlite-" in path.name
     )
 

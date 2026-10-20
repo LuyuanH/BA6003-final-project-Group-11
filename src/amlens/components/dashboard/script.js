@@ -19,7 +19,6 @@ export default function({parentElement,data,setTriggerValue}) {
   root.lang=L.zh?'zh-CN':'en';
   root.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   root.querySelector('[data-i18n="workspace"]').textContent=L.zh?'历史检测结果回放':'Historical detection replay';
-  root.querySelector('[data-i18n="waitHint"]').textContent=L.zh?'开始回放，等待检测批次完成':'Start replay and wait for a detection batch';
   for(const [key,attr] of [['aria','aria-label'],['title','title'],['placeholder','placeholder']])root.querySelectorAll(`[data-${key}]`).forEach(el=>el.setAttribute(attr,t(el.dataset[key])));
   root.querySelectorAll('[data-action="language"]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.value===L.lang)));
   const local=root._local ||= {account:null,tx:null,tab:'transactions',search:'',...state.ui,graphs:{}};
@@ -29,18 +28,63 @@ export default function({parentElement,data,setTriggerValue}) {
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let timer,deadline,commandTimer,alive=true;
   local.commands ||= [];
-  function send(action,value,evidenceId=detail?.evidenceId){
+  function send(action,value,evidenceId=detail?.evidenceId,id=crypto.randomUUID()){
     if(local.pending){
-      if(action!=='tick')local.commands.push({action,value,evidenceId});
-      return;
+      if(action!=='tick')local.commands.push({action,value,evidenceId,id});
+      return id;
     }
     local.pending=true;
     clearTimeout(deadline);
     const sentRevision=local.revision;
     deadline=setTimeout(()=>{if(local.revision===sentRevision){local.pending=false;get('connection-message').hidden=false;}},8000);
-    setTriggerValue('action',{id:crypto.randomUUID(),action,value,evidenceId,ui:{caseId:local.caseId,account:local.account,tx:local.tx,tab:local.tab,search:local.search}});
+    setTriggerValue('action',{id,action,value,evidenceId,ui:{caseId:local.caseId,account:local.account,tx:local.tx,tab:local.tab,search:local.search}});
+    return id;
   }
   function updateHTML(el,html){if(el.innerHTML!==html)el.innerHTML=html;}
+  const dialog=get('review-dialog'),form=get('review-form');
+  const fraudLabel=id=>id==='NON_FRAUD'?t('nonFraud'):pattern(id);
+  function closeReview(){
+    local.review=null;dialog.close();
+    requestAnimationFrame(()=>{if(root.isConnected)get(detail?.status==='reviewed'?'reopen':'finish-review').focus();});
+  }
+  function renderReview(){
+    const draft=local.review;
+    if(!draft){if(dialog.open)dialog.close();return;}
+    if(draft.requestId && state.review_result?.id===draft.requestId){
+      if(state.review_result.ok){closeReview();return;}
+      draft.error=state.review_result.error;draft.requestId=null;
+    }
+    if(draft.requestId && Date.now()-draft.sentAt>=8000){
+      draft.error='reviewTimeout';draft.requestId=null;
+    }
+    const busy=Boolean(draft.requestId);
+    text('review-case',caseId(draft.caseId));
+    const input=get('review-input'),select=get('review-select');
+    if(input.value!==draft.comment)input.value=draft.comment;
+    updateHTML(select,`<option value="">${esc(t('chooseFraudType'))}</option>`+
+      [...Object.keys(PATTERNS),'NON_FRAUD'].map(id=>`<option value="${id}">${esc(fraudLabel(id))}</option>`).join(''));
+    select.value=draft.fraudType;
+    input.disabled=select.disabled=busy;
+    get('review-submit').disabled=busy||!draft.comment.trim()||!draft.fraudType;
+    get('review-cancel').disabled=busy;
+    text('review-submit',t(busy?'submittingReview':'submitReview'));
+    get('review-error').hidden=!draft.error;text('review-error',draft.error?t(draft.error):'');
+    if(!dialog.open){dialog.showModal();input.focus();}
+  }
+  dialog.oncancel=e=>{e.preventDefault();if(!local.review?.requestId)closeReview();};
+  form.onsubmit=e=>{
+    e.preventDefault();const draft=local.review;
+    if(!draft||draft.requestId)return;
+    if(!draft.comment.trim()||![...Object.keys(PATTERNS),'NON_FRAUD'].includes(draft.fraudType)){
+      draft.error='reviewInvalid';renderReview();return;
+    }
+    draft.error=null;draft.sentAt=Date.now();
+    draft.requestId=send('complete_review',{caseId:draft.caseId,comment:draft.comment.trim(),fraudType:draft.fraudType},draft.evidenceId);
+    renderReview();
+  };
+  renderReview();
+  const reviewTimer=setInterval(()=>{if(local.review?.requestId)renderReview();},500);
+
   const inDetail=state.view==='detail' && Boolean(detail);
   root.classList.toggle('detail-mode',inDetail);
   if(local.view!==inDetail){local.view=inDetail;requestAnimationFrame(()=>{if(root.isConnected)root.scrollIntoView({block:'start',behavior:'instant'});});}
@@ -49,19 +93,15 @@ export default function({parentElement,data,setTriggerValue}) {
   get('nav-investigate').classList.toggle('active',inDetail);
   root.querySelector('.workspace-head').hidden=inDetail;
   root.querySelector('.metrics').hidden=inDetail;
+  root.querySelector('.page-footer').hidden=!inDetail;
   text('processed',num(data.processed));text('hold',num(data.hold));text('pending',num(data.pending));
   text('nav-count',num(data.pending+data.investigating));
   text('clock',L.time(data.date));text('day',L.date(data.date));
   text('processed-note',t('since',{date:L.shortStamp(data.startDate+' 00:00')}));
   text('case-note',t('caseNote',{active:num(data.investigating),done:num(data.reviewed)}));
-  text('play-state',t(state.playing?'playing':state.cursor>=data.rangeEnd?'ended':data.processed?'paused':'ready'));
   text('play',t(state.playing?'playing':state.cursor>=data.rangeEnd?'ended':'start'));
   get('play').disabled=state.playing||state.cursor>=data.rangeEnd;
-  get('start-date').disabled=true;get('seek').disabled=true;
-  root.querySelectorAll('[data-action="reset"],[data-action="next"]').forEach(el=>el.disabled=true);
-  updateHTML(get('start-date'),data.dates.map(d=>`<option value="${d}">${L.date(d)}</option>`).join(''));
-  get('start-date').value=data.startDate;get('speed').value=String(state.speed);
-  const seek=get('seek');seek.min=state.start-1;seek.max=data.rangeEnd;seek.value=Math.floor(state.cursor);seek.setAttribute('aria-valuetext',L.stamp(data.date));
+  get('speed').value=String(state.speed);
   text('footer-time',L.stamp(data.date));
   text('trend-start',L.shortStamp(data.startDate+' 00:00'));text('trend-end',L.shortStamp(data.date));
   const visibleQueue=()=>data.queue.filter(q=>(!state.pattern||q.pattern===state.pattern) &&
@@ -141,13 +181,53 @@ export default function({parentElement,data,setTriggerValue}) {
     if(local.tx!==null&&detail)g.dispatchAction({type:'highlight',seriesIndex:0,dataType:'edge',dataIndex:detail.transactions.findIndex(t=>t.id===local.tx)});
   }
   function accountMarkup(n){return `<strong title="${esc(entity(n?.entity))}">${esc(entity(n?.entity))}</strong><small title="${esc(n?.account)} · ${esc(n?.bank)}">${esc(n?.account)} · ${esc(n?.bank)}</small>`;}
+  function renderAnalysis(){
+    const analysis=data.analysis||{},entry=analysis.entry,button=get('analyze');
+    const running=entry?.status==='running';
+    button.disabled=Boolean(analysis.busy)||local.commands.some(command=>command.action==='analyze');
+    button.textContent=t(running?'aiRunning':entry?.status==='succeeded'?'aiRerun':entry?.status==='failed'?'aiRetry':'startInvestigation');
+    text('analysis-meta',entry?t('aiMeta',{model:entry.model,version:entry.version}):t('aiVersion',{version:detail.version}));
+    get('analysis-body').setAttribute('aria-busy',String(running));
+    let content;
+    if(entry?.status==='succeeded')content=analysisReportMarkup(entry,analysis.features||{},t);
+    else if(running)content=`<p class="analysis-progress"><span class="analysis-dot"></span>${esc(t('aiRunningHint'))}</p>`;
+    else if(entry?.status==='failed')content=`<p class="analysis-error">${esc(t('aiError_'+entry.error))}</p>`;
+    else content=`<p class="analysis-muted">${esc(t('aiEmpty'))}</p>`;
+    updateHTML(get('analysis-body'),content);
+    const notice=analysis.notice||(!analysis.configured?'configuration':analysis.busy&&!running?'busy':null);
+    get('analysis-notice').hidden=!notice;
+    text('analysis-notice',notice?t('aiError_'+notice):'');
+  }
+  function renderInsight(){
+    const insight=data.insight||{},entry=insight.entry,button=get('insight-generate');
+    const running=entry?.status==='running';
+    button.disabled=Boolean(insight.busy)||!data.processed||local.commands.some(command=>command.action==='overview_insight');
+    button.textContent=t(running?'insightRunning':entry?.status==='succeeded'?'insightRefresh':entry?.status==='failed'?'insightRetry':'insightGenerate');
+    get('insight-meta').hidden=!entry;
+    text('insight-meta',entry?t('insightAsOf',{date:L.stamp(entry.asOf),model:entry.model}):'');
+    get('insight-footnote').hidden=entry?.status!=='succeeded';
+    get('insight-body').setAttribute('aria-busy',String(running));
+    let content;
+    if(entry?.status==='succeeded')content=overviewReportMarkup(entry,t,pattern);
+    else if(running)content=`<p class="analysis-progress"><span class="analysis-dot"></span>${esc(t('insightRunning'))}</p>`;
+    else if(entry?.status==='failed')content=`<p class="analysis-error">${esc(t('aiError_'+entry.error))}</p>`;
+    else content=`<p class="insight-empty">${esc(t(data.processed?'insightEmpty':'insightNoData'))}</p>`;
+    updateHTML(get('insight-body'),content);
+    get('insight-stale').hidden=!(entry?.status==='succeeded'&&insight.stale);
+    const notice=insight.notice||(!insight.configured?'configuration':insight.busy&&!running?'busy':null);
+    get('insight-notice').hidden=!notice;
+    text('insight-notice',notice?t(notice==='no_data'?'insightNoData':'aiError_'+notice):'');
+  }
   function renderDetail(){
     if(!detail)return;
     const account=detail.nodes.find(n=>n.key===local.account),nodes=Object.fromEntries(detail.nodes.map(n=>[n.key,n]));
     text('case-title',`${caseId(detail.id)} · ${pattern(detail.pattern)}`);text('case-status',statusName(detail.status));get('case-status').className='badge '+detail.status;
     get('reopen').hidden=detail.status!=='reviewed';
-    root.querySelector('[data-action="status"][data-value="investigating"]').hidden=detail.status!=='pending';
-    root.querySelector('[data-action="status"][data-value="reviewed"]').hidden=detail.status==='reviewed';
+    renderAnalysis();
+    get('finish-review').hidden=detail.status==='reviewed';
+    get('review-summary').hidden=!detail.review;
+    text('review-type',detail.review?fraudLabel(detail.review.fraud_type):'');
+    text('review-comment',detail.review?.comment||'');
     text('detail-summary',summary(detail));text('account-title',t(account?'accountProfile':'caseProfile'));
     const stats=account?`<div class="profile-top"><strong>${esc(account.account)}</strong><p>${esc(entity(account.entity))}</p></div><dl class="profile-list"><dt>${t('entityId')}</dt><dd>${esc(account.entityId)}</dd><dt>${t('bank')}</dt><dd>${esc(account.bank)}</dd><dt>${t('bankId')}</dt><dd>${esc(account.bankId)}</dd><dt>${t('relatedTx')}</dt><dd>${t('txCount',{n:detail.transactions.filter(v=>key(v.fromBank,v.from)===account.key||key(v.toBank,v.to)===account.key).length})}</dd></dl>`:
       `<div class="profile-top"><strong>${esc(pattern(detail.pattern))}</strong></div><dl class="profile-list"><dt>${t('started')}</dt><dd>${L.stamp(detail.start)}</dd><dt>${t('queued')}</dt><dd>${L.stamp(detail.end)}</dd><dt>${t('involved')}</dt><dd>${t('accountEntityCount',{accounts:detail.nodes.length,entities:new Set(detail.nodes.map(n=>n.entityId)).size})}</dd></dl>`;
@@ -168,6 +248,7 @@ export default function({parentElement,data,setTriggerValue}) {
   text('graph-summary',detail?summary(detail):t('accountsArrow'));
   if(inDetail){renderDetail();graph('detail-network',detail);highlight();}
   else{
+    renderInsight();
     graph('network',detail);
     let trend=local.graphs.trend;
     if(!trend||trend.isDisposed())trend=local.graphs.trend=window.echarts.init(get('trend'),null,{renderer:'svg'});
@@ -181,27 +262,51 @@ export default function({parentElement,data,setTriggerValue}) {
   }
   root.onclick=e=>{
     const action=e.target.closest('[data-action]');
-    if(action){e.preventDefault();send(action.dataset.action,action.dataset.value);return;}
+    if(action){
+      e.preventDefault();
+      if(action.dataset.action==='overview_insight'){
+        if(action.disabled)return;
+        action.disabled=true;send('overview_insight');return;
+      }
+      if(action.dataset.action==='analyze'){
+        if(action.disabled||!detail)return;
+        action.disabled=true;send('analyze',detail.id);return;
+      }
+      send(action.dataset.action,action.dataset.value);return;
+    }
     const pat=e.target.closest('[data-pattern]');if(pat){send('pattern',state.pattern===pat.dataset.pattern?'':pat.dataset.pattern);return;}
     const row=e.target.closest('[data-case]');if(row){send('open',Number(row.dataset.case));return;}
+    const focusCase=e.target.closest('[data-insight-case]');
+    if(focusCase){send('open',Number(focusCase.dataset.insightCase));return;}
+    const reference=e.target.closest('[data-analysis-tx]');
+    if(reference){
+      const id=Number(reference.dataset.analysisTx);
+      if(!detail?.transactions.some(tx=>tx.id===id))return;
+      local.account=null;local.tab='transactions';local.tx=id;renderDetail();highlight();
+      const target=get('evidence').querySelector(`[data-tx="${id}"]`);
+      target?.scrollIntoView({block:'center',behavior:reduced?'instant':'smooth'});
+      target?.focus({preventScroll:true});return;
+    }
     const tx=e.target.closest('[data-tx]');if(tx){local.tx=local.tx===Number(tx.dataset.tx)?null:Number(tx.dataset.tx);renderDetail();highlight();return;}
     const account=e.target.closest('[data-account]');if(account){local.account=account.dataset.account;local.tx=null;local.tab='transactions';renderDetail();highlight();return;}
     const tab=e.target.closest('[data-tab]');if(tab){local.tab=tab.dataset.tab;renderDetail();return;}
     const role=e.target.closest('[data-role]')?.dataset.role;
+    if(role==='finish-review'&&detail){local.review={caseId:detail.id,evidenceId:detail.evidenceId,comment:'',fraudType:''};renderReview();return;}
+    if(role==='review-cancel'&&!local.review?.requestId){closeReview();return;}
     if(['graph-open','nav-investigate'].includes(role)&&detail)send('open',detail.id);
     if(role==='clear-pattern')send('pattern','');
     if(['clear-account','clear-evidence'].includes(role)){local.account=null;local.tx=null;renderDetail();highlight();}
   };
-  root.onchange=e=>{const r=e.target.dataset.role;if(r==='start-date')send('date',e.target.value);if(r==='speed')send('speed',Number(e.target.value));if(r==='seek')send('seek',Number(e.target.value));};
-  root.oninput=e=>{if(e.target.dataset.role==='queue-search'){local.search=e.target.value;renderQueue();}};
+  root.onchange=e=>{if(e.target.dataset.role==='review-select'&&local.review){local.review.fraudType=e.target.value;local.review.error=null;renderReview();return;}if(e.target.dataset.role==='speed')send('speed',Number(e.target.value));};
+  root.oninput=e=>{if(e.target.dataset.role==='review-input'&&local.review){local.review.comment=e.target.value;local.review.error=null;renderReview();return;}if(e.target.dataset.role==='queue-search'){local.search=e.target.value;renderQueue();}};
   root.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[tabindex]')){e.preventDefault();e.target.click();}};
   const resize=new ResizeObserver(()=>{if(alive)Object.entries(local.graphs).forEach(([role,g])=>{if(!g.isDisposed()&&g.getDom().clientWidth){g.resize();const el=g.getDom();if(role!=='trend' && el.dataset.fitHeight!==String(el.clientHeight) && g.getOption().series?.length){el.dataset.fitHeight=String(el.clientHeight);g.setOption({series:[{zoom:role==='detail-network'?1:el.clientHeight<210?.6:.75}]});}}});});resize.observe(root);
   if(local.commands.length && !local.pending)commandTimer=setTimeout(()=>{
-    const next=local.commands.shift();send(next.action,next.value,next.evidenceId);
+    const next=local.commands.shift();send(next.action,next.value,next.evidenceId,next.id);
   },0);
-  else if(state.playing)timer=setTimeout(()=>send('tick'),700);
+  else if(state.playing||data.analysis?.busy)timer=setTimeout(()=>send('tick'),state.playing?700:1000);
   return ()=>{
-    alive=false;clearTimeout(timer);clearTimeout(deadline);clearTimeout(commandTimer);resize.disconnect();root.onclick=null;root.onchange=null;root.oninput=null;root.onkeydown=null;
+    alive=false;clearInterval(reviewTimer);dialog.oncancel=null;form.onsubmit=null;clearTimeout(timer);clearTimeout(deadline);clearTimeout(commandTimer);resize.disconnect();root.onclick=null;root.onchange=null;root.oninput=null;root.onkeydown=null;
     Object.values(local.graphs).forEach(g=>g.off('click'));
     local.disposeFrame=requestAnimationFrame(()=>{if(!root.isConnected)Object.values(local.graphs).forEach(g=>g.dispose());});
   };

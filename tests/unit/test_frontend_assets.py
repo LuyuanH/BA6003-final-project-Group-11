@@ -7,11 +7,12 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
 
 class FrontendAssetsTests(unittest.TestCase):
     def test_fixed_assets_equal_original_snapshot(self):
-        baseline = json.loads((ROOT / "docs/frontend-baseline.json").read_text(encoding="utf-8"))
+        baseline = json.loads((FIXTURES / "frontend-baseline.json").read_text(encoding="utf-8"))
         assets = ROOT / "src/amlens/components/dashboard"
         for name, digest in baseline["files"].items():
             if name not in baseline["integration_changes"]:
