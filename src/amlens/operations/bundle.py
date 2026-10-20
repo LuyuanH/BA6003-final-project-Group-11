@@ -303,7 +303,7 @@ def create_bundle(
         # This comparison makes sure the archive uses the validated source and database files.
         final_files = project_bundle_files(project_root, data_dir, include_results=include_results)
         _check_snapshot(final_files, expected_identities)
-        with temporary.open("rb") as stream:
+        with temporary.open("r+b") as stream:
             os.fsync(stream.fileno())
         atomic_publication = _publish_bundle(temporary, output)
     finally:

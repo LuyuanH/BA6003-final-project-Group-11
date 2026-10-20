@@ -156,7 +156,7 @@ def prepare_data(
         connection.execute("PRAGMA journal_mode = DELETE")
         connection.close()
         connection = None
-        with temporary_path.open("rb") as stream:
+        with temporary_path.open("r+b") as stream:
             os.fsync(stream.fileno())
         os.replace(temporary_path, database_path)
         manifest_path = database_path.with_suffix(".manifest.json")
