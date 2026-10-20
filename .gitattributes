@@ -1,0 +1,12 @@
+# Keep frontend file bytes equal across Windows, macOS, and Linux checkouts.
+* text=auto eol=lf
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary

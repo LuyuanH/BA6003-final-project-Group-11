@@ -1,0 +1,17 @@
+include README.md pyproject.toml uv.lock .python-version .gitignore .gitattributes
+include MANIFEST.in
+graft scripts
+graft tests
+graft docs
+graft .streamlit
+graft .github
+prune .venv
+prune .git
+prune .ruff_cache
+prune .pytest_cache
+prune data
+prune artifacts
+prune build
+prune dist
+global-exclude __pycache__ *.py[cod] *.sqlite *.sqlite-* *.duckdb *.db *.log .DS_Store .env .env.*
+include .env.example
