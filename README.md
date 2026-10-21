@@ -86,6 +86,11 @@ It represents 5,078,345 source transactions, 330 evidence transactions, 49 struc
 The compressed snapshot is approximately 183 KB.
 Cloud deployment does not require the local data download or detection steps above.
 
+Deployment requires administrator access to the GitHub repository.
+For a private repository, first connect private repository access in Streamlit under **Settings > Linked accounts**.
+Review the requested GitHub permissions before authorization.
+See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-community-cloud/get-started/connect-your-github-account).
+
 1. Open [Streamlit Community Cloud](https://share.streamlit.io/).
 2. Select **Create app**, then **Yup, I have an app**.
 3. Enter these values:
