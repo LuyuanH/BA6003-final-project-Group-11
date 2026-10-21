@@ -31,13 +31,13 @@ Git does not track these files.
 1. Clone the repository:
 
    ```text
-   git clone https://github.com/LuyuanH/BA6003-final-project-Group-11.git
+   git clone https://github.com/LuyuanH/BA6003-final-project.git
    ```
 
 2. Go to the project directory:
 
    ```text
-   cd BA6003-final-project-Group-11
+   cd BA6003-final-project
    ```
 
 3. Install the dependencies at their locked versions:
@@ -122,7 +122,7 @@ See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-
 
    | Field | Value |
    | --- | --- |
-   | Repository | `LuyuanH/BA6003-final-project-Group-11` |
+   | Repository | `LuyuanH/BA6003-final-project` |
    | Branch | `main` |
    | Main file path | `streamlit_app.py` |
 
