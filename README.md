@@ -30,7 +30,7 @@ Git does not track these files.
 1. Clone the repository:
 
    ```text
-   git clone https://github.com/lunaticyang22-collab/BA6003-final-project-Group-11.git
+   git clone https://github.com/LuyuanH/BA6003-final-project-Group-11.git
    ```
 
 2. Go to the project directory:
@@ -121,7 +121,7 @@ See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-
 
    | Field | Value |
    | --- | --- |
-   | Repository | `lunaticyang22-collab/BA6003-final-project-Group-11` |
+   | Repository | `LuyuanH/BA6003-final-project-Group-11` |
    | Branch | `main` |
    | Main file path | `streamlit_app.py` |
 
