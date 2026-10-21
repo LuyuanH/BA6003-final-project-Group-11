@@ -12,6 +12,7 @@ Optional artificial intelligence (AI) examines case evidence and gives dashboard
 ### Requirements
 
 - Install [Git](https://git-scm.com/downloads).
+- Configure [GitHub SSH authentication](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) for an account with access to this repository.
 - Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 - Keep a minimum of **5 GB** of free disk space for source files, results, and temporary databases.
 
@@ -31,13 +32,13 @@ Git does not track these files.
 1. Clone the repository:
 
    ```text
-   git clone https://github.com/LuyuanH/BA6003-final-project.git
+   git clone git@github.com:LuyuanH/BA6003-final-project-Group-11.git
    ```
 
 2. Go to the project directory:
 
    ```text
-   cd BA6003-final-project
+   cd BA6003-final-project-Group-11
    ```
 
 3. Install the dependencies at their locked versions:
@@ -122,7 +123,7 @@ See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-
 
    | Field | Value |
    | --- | --- |
-   | Repository | `LuyuanH/BA6003-final-project` |
+   | Repository | `LuyuanH/BA6003-final-project-Group-11` |
    | Branch | `main` |
    | Main file path | `streamlit_app.py` |
 
