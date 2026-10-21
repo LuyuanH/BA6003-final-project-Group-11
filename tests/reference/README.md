@@ -1,32 +1,46 @@
-# 检测参考证据
+# Detection reference evidence
 
-[返回 README](../../README.md)
+[Go to README](../../README.md)
 
-## 内容与来源
+## Contents and source
 
-`expected-detection.json` 保存已完成的 `pattern-demo-lab` SQL 重计数所导出的参考证据，包含 1,221 份唯一的 `(rule_id, case_id)` 证据集，以及原始 CSV 交易行 ID。文件不包含原始账户详情或交易标签，检测过程和仪表盘均不读取这个文件。
+`expected-detection.json` stores reference evidence from the completed SQL recount in `pattern-demo-lab`.
+It contains 1,221 unique `(rule_id, case_id)` evidence sets and the source row IDs of CSV transactions.
+The file contains no raw account data or transaction labels.
+Detection and the dashboard do not read this file.
 
-参考运行使用规则集 `historical-demo-6ed874e77b60`，从 `2022-09-01 06:00:00` 至 `2022-09-18 18:00:00`，每 6 小时设置一个截止时间，共 71 个。每个截止时间使用 48、96 和 216 小时的窗口。候选结构来自 5,078,345 笔源交易，选中证据包含七类启用模式中的 330 笔唯一交易。
+The reference run used ruleset `historical-demo-6ed874e77b60`.
+It used 71 cutoffs at intervals of 6 hours, from `2022-09-01 06:00:00` to `2022-09-18 18:00:00`.
+Each cutoff used windows of 48, 96, and 216 hours.
+Candidates came from 5,078,345 source transactions.
+The selected evidence contains 330 unique transactions across seven enabled patterns.
 
-`provenance.json` 记录源文件和输出哈希值。记录中的路径用于标识历史文件，不是运行依赖。
+`provenance.json` records source and output hashes.
+Its paths identify historical files.
+These files are not runtime dependencies.
 
-## 比较检测结果
+## Compare detection results
 
-执行比较前，先完成 [README 中的首次安装](../../README.md#首次安装)，生成观测数据库和检测结果。
+First, complete [First installation in the README](../../README.md#first-installation) to build the observation database and detection results.
 
-在项目根目录执行参考比较：
+Run the reference comparison from the project root directory:
 
 ```sh
 python scripts/verify_detection.py
 ```
 
-比较过程不需要旧项目、DuckDB、Parquet 支持或被 Git 忽略的 artifacts 目录。使用 `--database path/to/detection.sqlite` 可选择其他结果数据库，使用 `--reference` 可选择同一参考证据的其他导出文件。
+The previous project, DuckDB, Parquet support, and the artifacts directory that Git ignores are not necessary for the comparison.
+Use `--database path/to/detection.sqlite` to select a different result database.
+Use `--reference` to select a different export of the same reference evidence.
 
-JSON 空白、记录顺序和成员顺序可以不同。验证器比较规范化后的 SHA-256 哈希值，拒绝缺失、重复或变化的参考证据。校验失败时，命令返回 JSON 报告，退出状态为 1。
+JSON whitespace, record order, and member order can be different.
+The verifier compares normalized SHA-256 hashes.
+It rejects missing, duplicate, or changed reference evidence.
+If verification finds errors, the command gives a JSON report and exits with status 1.
 
-## 参考证据导出
+## Reference evidence export
 
-参考导出使用 `results/sql_recount/selected_evidence.parquet`，源查询如下：
+The reference export used `results/sql_recount/selected_evidence.parquet` and this source query:
 
 ```sql
 SELECT DISTINCT rule_id, family, case_id, transaction_ids
@@ -34,13 +48,18 @@ FROM selected_candidates
 ORDER BY rule_id, case_id;
 ```
 
-## 更新检测参考
+## Update the detection reference
 
-不得只为使测试通过，就使用被测实现生成的结果替换参考证据。建立修订后的参考时，按以下顺序操作：
+Do not replace reference evidence with results from the implementation under test only to stop test failures.
+For a new reference, use this sequence:
 
-1. 运行独立参考实现。
-2. 导出选中证据。
-3. 审阅变化的交易集合和源记录。
-4. 同步更新参考文件和验证器预期值。
+1. Run a reference implementation that operates independently of the implementation under test.
+2. Export the selected evidence.
+3. Examine the changed transaction sets and source records.
+4. Update the reference files and the verifier's specified values together.
 
-参考证据只验证历史复现，不证明对未见数据的预测表现。源码分发包不包含原始 CSV 或生成的 SQLite 数据库，需要获取匹配输入并在本地重建。
+The reference evidence shows historical reproduction only.
+It does not show prediction performance on data that the reference run does not include.
+Source distributions do not include raw CSV files or SQLite databases from data preparation.
+Get the matching inputs.
+Rebuild the databases locally.

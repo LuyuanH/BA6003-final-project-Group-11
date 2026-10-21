@@ -1,52 +1,91 @@
-# 架构与检测流程
+# Architecture and detection
 
-[返回 README](../README.md)
+[Go to README](../README.md)
 
-AMLens 将数据导入、离线检测和仪表盘回放分开执行。仪表盘读取已保存的结果，不触发检测。
+AMLens runs data import, offline detection, and dashboard replay independently.
+The dashboard reads stored results.
+It does not start detection.
 
-## 数据流与模块边界
+## Data flow and module boundaries
 
-1. `operations` 下载并校验指定源文件。
-2. `ingestion` 分批读取 CSV，构建观测数据库 `data/processed/amlens.sqlite`。
-3. `detection` 用 Python 图算法生成候选结构、计算特征，再通过 SQLite 应用固定规则。
-4. `services` 调度检测，将证据和检测时间写入 `data/processed/detection.sqlite`。
-5. 回放服务读取两个数据库，由 `presenters` 和 `components` 准备并展示界面数据。
+1. `operations` downloads the specified source files and examines them.
+2. `ingestion` reads CSV batches and writes the observation database, `data/processed/amlens.sqlite`.
+3. `detection` uses Python graph algorithms to create candidates and calculate features. It then uses fixed rules through SQLite.
+4. `services` schedules detection and writes evidence and detection times to `data/processed/detection.sqlite`.
+5. The replay service reads the two databases. `presenters` prepares interface data, and `components` shows the data.
 
-`db` 管理数据库连接、查询和结果存储。数据库模块和检测模块不依赖 Streamlit，浏览器不执行 SQL。
+`db` manages database connections, queries, and result storage.
+The database and detection modules operate without Streamlit.
+The browser does not execute SQL.
 
-`analysis` 读取当前回放时间可用的证据或总览快照，调用 OpenRouter 并校验报告。AI 结果只保存在当前 Streamlit 会话中，不写入检测数据库，也不修改人工复核结论。
+`analysis` reads evidence or an overview snapshot available at the replay time.
+It calls OpenRouter and examines the report.
+AI results stay only in the active Streamlit session.
+The application does not write AI results to the detection database or change manual review decisions.
 
-## 观测数据
+## Observation data
 
-导入过程保留源行号。`paid_raw` 和 `received_raw` 保留原始金额精度；`paid` 和 `received` 按 DECIMAL(24,2) 舍入，以货币单位的百分之一存储为整数。两条内容相同的源记录仍是两笔独立交易。
+The import process keeps source row numbers.
+`paid_raw` and `received_raw` keep the source precision of transaction amounts.
+`paid` and `received` use DECIMAL(24,2) rounding and store integers in units of one hundredth of the currency unit.
+Two source records with the same content stay two transactions.
 
-`nodes` 表将银行和账户映射为节点 ID，`edges` 视图提供交易观测。源时间戳没有时区，应用使用源文件中的本地时间，不做时区转换。
+The `nodes` table maps banks and accounts to node IDs.
+The `edges` view gives transaction observations.
+Source timestamps have no time zone.
+The application uses the local time in the source file without time zone conversion.
 
-观测数据库不包含评价标签，检测也不读取 Patterns 文件。规则与参考结果的比较只用于验证历史复现，不证明对未见数据的预测表现。
+The observation database contains no evaluation labels.
+Detection does not read Patterns files.
+The reference comparison shows historical reproduction only.
+It does not show prediction performance on data that the reference run does not include.
 
-## 检测规则与窗口
+## Detection rules and windows
 
-规则版本为 `historical-demo-6ed874e77b60`，配置见[固定规则集](../src/amlens/detection/frozen_ruleset.json)。启用的规则为 FAN-IN、FAN-OUT、CYCLE、GATHER-SCATTER、SCATTER-GATHER、STACK 和 RANDOM；BIPARTITE 未启用。
+The rule version is `historical-demo-6ed874e77b60`.
+See the [fixed ruleset](../src/amlens/detection/frozen_ruleset.json) for the configuration.
+The ruleset uses these rules:
 
-检测每 6 小时执行一次，使用 48、96 和 216 小时的历史窗口。窗口包含起点，不包含截止时间，区间为 `[window_start, cutoff)`。
+- FAN-IN
+- FAN-OUT
+- CYCLE
+- GATHER-SCATTER
+- SCATTER-GATHER
+- STACK
+- RANDOM
 
-账户背景特征使用全部支付方式，候选结构使用符合条件的 ACH 交易。图算法限制邻居数量、路径长度和搜索展开次数，运行统计记录限制及排除的分支。
+The ruleset does not use BIPARTITE.
 
-## 证据与数据库一致性
+Detection runs at intervals of 6 hours with historical windows of 48, 96, and 216 hours.
+Each window includes the start time but does not include the cutoff: `[window_start, cutoff)`.
 
-结果数据库保存结构组、首次检测时间、证据版本和交易成员。每个证据版本保持不变，同一份证据不重复存储。回放仅展示当前已发现的最新完整版本，不合并不同版本的交易成员。
+Account background features use all payment methods.
+Candidates use ACH transactions that meet the selection conditions.
+Graph algorithms use limits for neighbor counts, path lengths, and search expansions.
+Run statistics record these limits and the branches that the search does not examine.
 
-导入和检测先构建临时数据库，再替换已有数据库。观测数据库更新后，旧检测结果可能不再匹配；仪表盘会拒绝加载不匹配的结果，需要重新运行检测。
+## Evidence and database consistency
 
-参考证据的来源和比较方法见[参考证据说明](../tests/reference/README.md)。
+The result database stores structure groups, first detection times, evidence versions, and transaction members.
+The application does not change stored evidence versions.
+The database stores only one copy of each evidence set.
+Replay shows only the last full version available at the replay time.
+It does not put transaction members from different versions together.
 
-## 项目术语
+Import and detection write temporary databases before they replace previous databases.
+Previous detection results are not always compatible with an updated observation database.
+The dashboard rejects results that are not compatible with the observation database.
+If the dashboard rejects the results, run detection again.
 
-| 术语 | 定义 |
+See [Detection reference evidence](../tests/reference/README.md) for the source of the reference evidence and the comparison procedure.
+
+## Project terms
+
+| Term | Definition |
 | --- | --- |
-| 候选结构 | SQL 规则筛选前的完整交易结构 |
-| 截止时间 | 检测批次的结束边界，不属于本批次窗口 |
-| 证据集 | 一个选中候选结构的完整交易成员 |
-| 证据版本 | 一份已保存证据集及其首次检测时间 |
-| 结构组 | 关键结构账户相同的关联证据版本集合 |
-| 规则集 | 带版本的检测规则和搜索限制集合 |
+| Candidate | A full transaction structure before SQL rule selection |
+| Cutoff | The end boundary of a detection batch, not part of that batch's window |
+| Evidence set | All transaction members of one selected candidate |
+| Evidence version | A stored evidence set with its first detection time |
+| Structure group | A set of evidence versions with the same key accounts in the structure |
+| Ruleset | A set of detection rules and search limits with a version ID |

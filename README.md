@@ -1,98 +1,122 @@
 # AMLens
 
-AMLens 用于反洗钱交易结构分析。项目将交易数据存入 SQLite，使用 Python 图算法和七条固定 SQL 规则离线检测交易结构。Streamlit 仪表盘按历史时间回放检测证据，支持人工案件复核。
+AMLens is a tool for anti-money laundering analysis of transaction structures.
+It stores transactions in SQLite.
+Python graph algorithms and seven fixed SQL rules detect transaction structures without an internet connection.
+A Streamlit dashboard replays detection evidence in historical time for manual case review.
 
-可选的人工智能（AI）分析提供案件证据评估和仪表盘摘要。
+Optional artificial intelligence (AI) examines case evidence and gives dashboard summaries.
 
-## 安装与启动
+## Setup
 
-### 环境要求
+### Requirements
 
-- 安装 [Git](https://git-scm.com/downloads)。
-- 安装 [uv](https://docs.astral.sh/uv/getting-started/installation/)。
-- 预留至少 **5 GB** 可用磁盘空间，用于源文件、结果和临时数据库。
+- Install [Git](https://git-scm.com/downloads).
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
+- Keep a minimum of **5 GB** of free disk space for source files, results, and temporary databases.
 
-项目通过 `.python-version` 指定 Python **3.13.15**，uv 根据这个文件选择解释器。首次安装依赖和下载数据需要联网。以下命令适用于 Windows PowerShell、macOS 和 Linux。
+The specified Python version in `.python-version` is **3.13.15**.
+uv uses this file to select the interpreter.
+An internet connection is necessary for the first dependency installation and data download.
+Use the commands below with Windows PowerShell, macOS, or Linux.
 
-默认数据来自 [Kaggle 数据集版本 8](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml/versions/8)。下载器按[数据源清单](src/amlens/operations/reference_dataset.json)校验文件大小和 SHA-256 哈希值。源文件、数据库和结果保存在项目根目录的 `data/`，不纳入 Git。
+The default data comes from [Kaggle dataset version 8](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml/versions/8).
+The downloader compares file sizes and SHA-256 hashes with the [source manifest](src/amlens/operations/reference_dataset.json).
+Source files, databases, and results stay in `data/` in the project root directory.
+Git does not track these files.
 
-### 首次安装
+### First installation
 
-1. 克隆仓库：
+1. Clone the repository:
 
    ```text
    git clone https://github.com/lunaticyang22-collab/BA6003-final-project-Group-11.git
    ```
 
-2. 进入项目目录：
+2. Go to the project directory:
 
    ```text
    cd BA6003-final-project-Group-11
    ```
 
-3. 安装锁定版本的依赖：
+3. Install the dependencies at their locked versions:
 
    ```text
    uv sync --frozen
    ```
 
-4. 下载源数据并重建数据库：
+4. Prepare the data:
 
-   如果 Kaggle 要求认证，先按[官方认证说明](https://github.com/Kaggle/kagglehub#authenticate)在本机设置 `KAGGLE_API_TOKEN`，或创建 `~/.kaggle/kaggle.json`。凭据不得写入源代码、命令参数或 Git。
+   If authentication is necessary for Kaggle, first use the [official authentication instructions](https://github.com/Kaggle/kagglehub#authenticate).
+   Set `KAGGLE_API_TOKEN` locally, or make `~/.kaggle/kaggle.json`.
+   Do not put credentials in source code, command arguments, or Git.
 
    ```text
    uv run --frozen python scripts/reproduce.py --download
    ```
 
-   命令会校验源文件、导入交易、运行检测，并将检测结果与参考证据比较。数据准备完成后，命令退出。已有本地记录中的检测阶段耗时约 **14 分钟**；完整安装耗时取决于计算机性能和下载速度。
+   This command downloads the source files, verifies them, imports transactions, runs detection, and compares the results with reference evidence.
+   The command stops after data preparation.
+   A previous local record gives approximately **14 minutes** for detection.
+   The full installation time changes with computer performance and download speed.
 
-### 配置 AI 分析
+### Configure AI analysis
 
-此步骤可选。未配置 AI 时，仪表盘和人工复核仍可使用，分析卡片会显示配置说明。
+This procedure is optional.
+The dashboard and manual review stay available without AI configuration.
+If you do not configure AI, the analysis cards show configuration instructions.
 
-选择支持 JSON Schema 结构化输出的准确 OpenRouter 模型 ID。应用要求提供方支持请求参数，不会自动选择其他模型。支持要求见 [OpenRouter 结构化输出说明](https://openrouter.ai/docs/guides/features/structured-outputs)。
+Select the full ID of an OpenRouter model with support for JSON Schema structured outputs.
+The application uses only providers with support for the request parameters.
+It does not select a different model automatically.
+See [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs) for the requirements.
 
-API 密钥不得写入 Git、浏览器代码或共享日志。Git 和项目导出均排除本地 `.env` 文件，只保留不含凭据的示例文件。
+Do not put API keys in Git, browser code, or logs that other persons can read.
+Git and project exports do not include local `.env` files.
+They keep only example files without credentials.
 
-1. 将 [`.env.example`](.env.example) 复制为项目根目录的 `.env`，与 `pyproject.toml` 放在同一目录。
-2. 在 `.env` 中设置 API 密钥和模型 ID：
+1. Copy [`.env.example`](.env.example) to `.env` in the project root directory, next to `pyproject.toml`.
+2. Set the API key and model ID in `.env`:
 
    ```dotenv
    OPENROUTER_API_KEY="your-local-key"
    AMLENS_AI_MODEL="provider/model-id"
    ```
 
-3. 在本机替换两个占位值。
+3. Replace the two placeholder values locally.
 
-同一份 `.env` 格式适用于 Windows、macOS 和 Linux。完成配置后，按下一节启动仪表盘。
+Use the same `.env` format on Windows, macOS, and Linux.
+After configuration, start the dashboard with the command in the next section.
 
-### 启动仪表盘
+### Start the dashboard
 
-首次数据准备成功后，在项目根目录执行启动命令：
+If there are no errors from data preparation, run this command from the project root directory:
 
 ```text
 uv run --frozen amlens --server.port=8513
 ```
 
-在浏览器中打开 [http://127.0.0.1:8513](http://127.0.0.1:8513)。
+Open [http://127.0.0.1:8513](http://127.0.0.1:8513) in a browser.
 
-后续启动仪表盘只需执行本节的启动命令。检测和回放可以离线运行，AI 分析需要联网。
+To start the dashboard again, run only the start command in this section.
+No internet connection is necessary for detection or replay.
+An internet connection is necessary for AI analysis.
 
 ### Deploy to Streamlit Community Cloud
 
 The repository includes `deployment/replay.json.gz` for cloud deployment.
-This snapshot contains all saved evidence, related transactions and accounts, and the complete transaction count timeline.
+This snapshot contains all saved evidence, its transaction and account data, and the full timeline of transaction counts.
 It represents 5,078,345 source transactions, 330 evidence transactions, 49 structure groups, and 1,221 evidence versions.
 The compressed snapshot is approximately 183 KB.
-Cloud deployment does not require the local data download or detection steps above.
+The local data download and detection steps above are not necessary for cloud deployment.
 
-Deployment requires administrator access to the GitHub repository.
+Administrator access to the GitHub repository is necessary for deployment.
 For a private repository, first connect private repository access in Streamlit under **Settings > Linked accounts**.
-Review the requested GitHub permissions before authorization.
+Examine the requested GitHub permissions before authorization.
 See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-community-cloud/get-started/connect-your-github-account).
 
 1. Open [Streamlit Community Cloud](https://share.streamlit.io/).
-2. Select **Create app**, then **Yup, I have an app**.
+2. Select **Create app**. Then, select **Yup, I have an app**.
 3. Enter these values:
 
    | Field | Value |
@@ -101,56 +125,65 @@ See [GitHub connection requirements](https://docs.streamlit.io/deploy/streamlit-
    | Branch | `main` |
    | Main file path | `streamlit_app.py` |
 
-4. Open **Advanced settings** and select Python **3.13**.
-5. To enable AI, enter these root-level values in **Secrets**:
+4. Open **Advanced settings**. Select Python **3.13**.
+5. For AI analysis, enter these root-level values in **Secrets**:
 
    ```toml
    OPENROUTER_API_KEY = "your-cloud-key"
    AMLENS_AI_MODEL = "provider/model-id"
    ```
 
-   Replace the placeholders with your key and an exact model ID that supports JSON Schema structured outputs.
+   Replace the placeholders with your key and the model ID from [Configure AI analysis](#configure-ai-analysis).
    Streamlit makes root-level secrets available as environment variables.
    Do not commit `.streamlit/secrets.toml` or `.env`.
-   Without these values, replay and manual review remain available.
+   Without these values, replay and manual review stay available.
 
-6. Select **Save**, then **Deploy**.
-7. Check the application logs for startup errors.
-8. Open a case and test AI analysis after replay reaches a detection time.
+6. Select **Save**. Then, select **Deploy**.
+7. Examine the application logs for startup errors.
+8. After replay reaches a detection time, open a case. Do a test of AI analysis.
 
 Community Cloud installs dependencies from `uv.lock`.
 The cloud entry point reads only the committed snapshot.
 It does not download source data or run detection.
-Reviews and AI results stay in the current session; reconnection or restart can remove them.
+Reviews and AI results stay in the active session.
+Reconnection or restart can remove these results.
 See the official [deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy) and [dependency rules](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
 
-To preview the cloud entry point locally, run:
+To open the cloud entry point locally, run:
 
 ```text
 uv run --frozen streamlit run streamlit_app.py --server.address=127.0.0.1 --server.port=8514
 ```
 
-To update cloud data after successful local detection:
+If local detection stops without errors, update cloud data with these steps:
 
-1. Export the checked databases:
+1. Export the verified databases:
 
    ```text
    uv run --frozen python scripts/export_replay.py
    ```
 
-   The exporter checks database compatibility and snapshot integrity before it replaces the previous snapshot.
-   Export fails if detection is incomplete, source versions differ, or replay references are invalid.
-   The reader accepts snapshot format version 1 and at most 64 MiB of uncompressed JSON.
+   The exporter examines database compatibility and snapshot integrity before it replaces the previous snapshot.
+   The exporter stops with an error if:
 
-2. Commit `deployment/replay.json.gz` and push the commit to the deployment branch.
-3. Check the updated application in Community Cloud.
+   - Detection is not completed.
+   - Source versions are different.
+   - Replay references contain errors.
 
-If the application reports unavailable replay data, export the snapshot again and commit it.
-For AI authentication, credit, or model errors, correct the Secrets values or provider configuration, then retry the analysis.
+   The reader accepts snapshot format version 1.
+   The maximum size for uncompressed JSON is 64 MiB.
 
-## 文档目录
+2. Commit `deployment/replay.json.gz`. Push the commit to the deployment branch.
+3. Examine the updated application in Community Cloud.
 
-| 文档 | 内容 |
+If the application reports unavailable replay data, export the snapshot again.
+Commit the snapshot.
+For AI authentication, credit, or model errors, correct the Secrets values or provider configuration.
+Run the analysis again.
+
+## Documentation
+
+| Document | Contents |
 | --- | --- |
-| [仪表盘使用](docs/dashboard.md) | 语言设置、回放、证据版本和人工复核 |
-| [架构与检测流程](docs/architecture.md) | 模块职责、检测规则、数据流和项目术语 |
+| [Dashboard use](docs/dashboard.md) | Language selection, replay, evidence versions, and manual review |
+| [Architecture and detection](docs/architecture.md) | Module functions, detection rules, data flow, and project terms |

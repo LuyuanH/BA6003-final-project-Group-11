@@ -1,38 +1,58 @@
-# 仪表盘使用
+# Dashboard use
 
-[返回 README](../README.md)
+[Go to README](../README.md)
 
-仪表盘按历史时间回放检测结果，支持查看证据和人工复核。安装、AI 配置及启动命令见 [README](../README.md#安装与启动)。
+The dashboard replays detection results in historical time for evidence inspection and manual review.
+See the [README](../README.md#setup) for installation, AI configuration, and start commands.
 
-## 语言与回放
+## Language and replay
 
-新会话默认使用英文，可切换为中文。AI 分析采用请求开始时的界面语言，以下操作保留英文界面标签。
+New sessions use English by default.
+You can select Chinese.
+AI analysis uses the interface language at the start of the request.
+The instructions below use the English interface labels.
 
-回放速度为 900×、3,600×、14,400× 和 28,800×，默认使用 28,800×。回放只向前推进，包含最后一个检测截止时间；查看案件不会暂停回放。回放不支持定位、反向推进或恢复上次位置。
+Replay speeds are 900×, 3,600×, 14,400×, and 28,800×.
+The default speed is 28,800×.
+Replay moves forward only and includes the last detection cutoff.
+Case inspection does not pause replay.
+You cannot move replay to a selected time or move it backward.
+Replay does not start again from the previous session position.
 
-## 查看案件
+## Case inspection
 
-队列包含等待复核或正在调查的结构组。打开案件后，交易图和证据表展示当前回放时间下最新的完整证据版本，不包含未来证据。证据集、版本和结构组的定义见[项目术语](architecture.md#项目术语)。
+The queue contains structure groups that wait for review or are under investigation.
+The transaction graph and evidence table show the last evidence version available at the replay time.
+This version contains all transaction members.
+They do not include future evidence.
+See [Project terms](architecture.md#project-terms) for the definitions of evidence sets, evidence versions, and structure groups.
 
-## 人工复核
+## Manual review
 
-1. 从队列打开案件。
-2. 查看交易图和证据表。
-3. 选择「Complete review ✓」，打开复核表单。
-4. 填写评论。
-5. 选择欺诈类型。
-6. 选择「Submit」。
+1. Open a case from the queue.
+2. Examine the transaction graph and evidence table.
+3. Select **Complete review ✓** to open the review form.
+4. Enter a comment.
+5. Select a fraud type.
+6. Select **Submit**.
 
-评论和欺诈类型均为必填项。类型选项包含八种模式及「Non-fraud / False positive」。
+A comment and fraud type are necessary.
+The fraud types include eight patterns and **Non-fraud / False positive**.
 
-提交成功后，结构组从当前会话的队列移除；新证据不会使已完成复核的结构组自动返回队列。结论保留在案件详情中。选择「Reopen review」可重新加入队列。
+When the application accepts a review, it removes the structure group from the queue in the active session.
+New evidence does not automatically add a group with a completed review to the queue again.
+The decision stays in the case details.
+Select **Reopen review** to add the group to the queue again.
 
-复核状态只属于当前浏览器会话。AI 报告不会完成人工复核，也不会修改人工结论。
+Review status is only for the active browser session.
+AI reports do not complete manual reviews or change manual decisions.
 
-## 数量与金额
+## Transaction counts and amounts
 
-- 已处理交易数统计当前回放时间内的源交易。
-- 待复核交易数对未复核结构组的全部已发现证据去重，不只统计详情中展示的最新版本。
-- 与其他未复核结构组共享的交易仍保持待处理状态。
-- 各模式的交易可能重叠，不能直接相加得到总数。
-- 金额按币种分别展示。
+- The processed transaction count includes source transactions before or at the replay time.
+- The pending transaction count includes all available evidence from structure groups without a completed review.
+  The count includes each transaction ID one time.
+  It includes previous evidence versions, not only the last version in the case details.
+- A transaction stays pending if it is also in a different structure group without a completed review.
+- Transactions can be part of more than one pattern. Do not add the pattern counts to get a total.
+- The dashboard shows transaction amounts independently for each currency.
