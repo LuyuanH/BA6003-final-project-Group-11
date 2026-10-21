@@ -88,6 +88,10 @@ class LauncherTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         configured = tomllib.loads((root / ".streamlit" / "config.toml").read_text())
         for option, expected in STREAMLIT_DEFAULTS.items():
+            if option == "server.address":
+                self.assertNotIn("address", configured["server"])
+                self.assertEqual(expected, "127.0.0.1")
+                continue
             section, key = option.split(".")
             actual = configured[section][key]
             if isinstance(actual, bool):

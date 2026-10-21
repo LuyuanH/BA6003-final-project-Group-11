@@ -5,18 +5,11 @@ import sqlite3
 import streamlit as st
 
 from amlens.components.observatory import render_observatory
+from amlens.components.page import configure_page
 from amlens.config import OBSERVATION_DB, RESULTS_DB
 from amlens.services.dashboard_service import load_dashboard_data
 
-st.set_page_config(
-    page_title="AMLens", page_icon="◈", layout="wide", initial_sidebar_state="collapsed"
-)
-st.html("""<style>
-[data-testid="stAppViewContainer"],[data-testid="stApp"]{background:#F7F2EB}
-[data-testid="stHeader"],[data-testid="stToolbar"],[data-testid="stStatusWidget"]{display:none}
-.stMainBlockContainer{padding:0 24px 0!important;max-width:1600px!important}
-[data-testid="stVerticalBlock"]{gap:0}footer{display:none}
-</style>""")
+configure_page()
 if not OBSERVATION_DB.exists() or not RESULTS_DB.exists():
     st.error("Prepare the source database and offline detection results before starting replay.")
     st.code("uv run python scripts/prepare_data.py\nuv run python scripts/detect_patterns.py")

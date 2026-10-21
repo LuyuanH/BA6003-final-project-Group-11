@@ -78,6 +78,71 @@ uv run --frozen amlens --server.port=8513
 
 后续启动仪表盘只需执行本节的启动命令。检测和回放可以离线运行，AI 分析需要联网。
 
+### Deploy to Streamlit Community Cloud
+
+The repository includes `deployment/replay.json.gz` for cloud deployment.
+This snapshot contains all saved evidence, related transactions and accounts, and the complete transaction count timeline.
+It represents 5,078,345 source transactions, 330 evidence transactions, 49 structure groups, and 1,221 evidence versions.
+The compressed snapshot is approximately 183 KB.
+Cloud deployment does not require the local data download or detection steps above.
+
+1. Open [Streamlit Community Cloud](https://share.streamlit.io/).
+2. Select **Create app**, then **Yup, I have an app**.
+3. Enter these values:
+
+   | Field | Value |
+   | --- | --- |
+   | Repository | `lunaticyang22-collab/BA6003-final-project-Group-11` |
+   | Branch | `main` |
+   | Main file path | `streamlit_app.py` |
+
+4. Open **Advanced settings** and select Python **3.13**.
+5. To enable AI, enter these root-level values in **Secrets**:
+
+   ```toml
+   OPENROUTER_API_KEY = "your-cloud-key"
+   AMLENS_AI_MODEL = "provider/model-id"
+   ```
+
+   Replace the placeholders with your key and an exact model ID that supports JSON Schema structured outputs.
+   Streamlit makes root-level secrets available as environment variables.
+   Do not commit `.streamlit/secrets.toml` or `.env`.
+   Without these values, replay and manual review remain available.
+
+6. Select **Save**, then **Deploy**.
+7. Check the application logs for startup errors.
+8. Open a case and test AI analysis after replay reaches a detection time.
+
+Community Cloud installs dependencies from `uv.lock`.
+The cloud entry point reads only the committed snapshot.
+It does not download source data or run detection.
+Reviews and AI results stay in the current session; reconnection or restart can remove them.
+See the official [deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy) and [dependency rules](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies).
+
+To preview the cloud entry point locally, run:
+
+```text
+uv run --frozen streamlit run streamlit_app.py --server.address=127.0.0.1 --server.port=8514
+```
+
+To update cloud data after successful local detection:
+
+1. Export the checked databases:
+
+   ```text
+   uv run --frozen python scripts/export_replay.py
+   ```
+
+   The exporter checks database compatibility and snapshot integrity before it replaces the previous snapshot.
+   Export fails if detection is incomplete, source versions differ, or replay references are invalid.
+   The reader accepts snapshot format version 1 and at most 64 MiB of uncompressed JSON.
+
+2. Commit `deployment/replay.json.gz` and push the commit to the deployment branch.
+3. Check the updated application in Community Cloud.
+
+If the application reports unavailable replay data, export the snapshot again and commit it.
+For AI authentication, credit, or model errors, correct the Secrets values or provider configuration, then retry the analysis.
+
 ## 文档目录
 
 | 文档 | 内容 |

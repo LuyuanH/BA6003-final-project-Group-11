@@ -23,8 +23,9 @@ SOURCE_FILES_TO_COPY = (
     ".gitattributes",
     "MANIFEST.in",
     ".env.example",
+    "streamlit_app.py",
 )
-SOURCE_DIRECTORIES = ("src", "scripts", "tests", "docs", ".streamlit", ".github")
+SOURCE_DIRECTORIES = ("src", "scripts", "tests", "docs", ".streamlit", ".github", "deployment")
 RESULT_FILES = ("amlens.sqlite", "detection.sqlite")
 
 # Checksums do not show whether required files are absent.
@@ -35,6 +36,7 @@ REQUIRED_SOURCE_GROUPS = {
         "detect_patterns.py",
         "download_data.py",
         "export_portable.py",
+        "export_replay.py",
         "prepare_data.py",
         "reproduce.py",
         "verify_ablation.py",
@@ -52,7 +54,7 @@ REQUIRED_SOURCE_GROUPS = {
         "response.py",
         "session.py",
     ),
-    "src/amlens/components": ("__init__.py", "observatory.py"),
+    "src/amlens/components": ("__init__.py", "observatory.py", "page.py"),
     "src/amlens/components/dashboard": (
         "analysis.js",
         "echarts.min.js",
@@ -120,7 +122,9 @@ REQUIRED_SOURCE_GROUPS = {
         "dashboard_service.py",
         "detection_service.py",
         "replay_service.py",
+        "snapshot_service.py",
     ),
+    "deployment": ("replay.json.gz",),
     "tests/reference": ("expected-detection.json", "provenance.json", "README.md"),
     ".streamlit": ("config.toml",),
 }
@@ -153,6 +157,7 @@ def _source_files(project_root: Path) -> dict[str, Path]:
                 or path.name.startswith(".bundle-")
                 or path.name == ".env"
                 or path.name.startswith(".env.")
+                or path.name == "secrets.toml"
             ):
                 continue
             if path.is_symlink():

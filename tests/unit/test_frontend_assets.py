@@ -26,7 +26,7 @@ class FrontendAssetsTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(content).hexdigest(), digest, name)
 
     def test_embedded_streamlit_css_remains_original(self):
-        app = (ROOT / "src/amlens/app.py").read_text(encoding="utf-8")
+        app = (ROOT / "src/amlens/components/page.py").read_text(encoding="utf-8")
         css = re.search(r"<style>(.*?)</style>", app, re.S).group(1)
         self.assertEqual(
             css,

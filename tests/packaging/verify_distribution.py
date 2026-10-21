@@ -17,6 +17,7 @@ SOURCE_TREES = (
     "static",
     ".streamlit",
     ".github",
+    "deployment",
 )
 REQUIRED_ROOT_FILES = (
     "README.md",
@@ -28,6 +29,8 @@ REQUIRED_ROOT_FILES = (
     "MANIFEST.in",
     ".env.example",
     ".streamlit/config.toml",
+    "streamlit_app.py",
+    "deployment/replay.json.gz",
 )
 EXCLUDED_PARTS = {
     ".venv",
@@ -58,6 +61,7 @@ def excluded(name: str) -> bool:
         path.suffix in {".pyc", ".pyo", ".sqlite", ".db", ".duckdb", ".log"}
         or (path.name.startswith(".env") and name != ".env.example")
         or path.name.startswith(".DS_Store")
+        or path.name == "secrets.toml"
         or ".sqlite-" in path.name
     )
 

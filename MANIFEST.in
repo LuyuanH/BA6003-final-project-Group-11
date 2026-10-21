@@ -1,5 +1,7 @@
 include README.md pyproject.toml uv.lock .python-version .gitignore .gitattributes
 include MANIFEST.in
+include streamlit_app.py
+graft deployment
 graft scripts
 graft tests
 graft docs
@@ -13,5 +15,5 @@ prune data
 prune artifacts
 prune build
 prune dist
-global-exclude __pycache__ *.py[cod] *.sqlite *.sqlite-* *.duckdb *.db *.log .DS_Store .env .env.*
+global-exclude __pycache__ *.py[cod] *.sqlite *.sqlite-* *.duckdb *.db *.log .DS_Store .env .env.* secrets.toml
 include .env.example

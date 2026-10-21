@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .env
+.streamlit/secrets.toml
 .env.*
 !.env.example
 .DS_Store

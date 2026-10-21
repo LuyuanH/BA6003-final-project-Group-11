@@ -47,6 +47,7 @@ class BundleTests(unittest.TestCase):
         # Make sure the bundle excludes files that belong to the local environment.
         self.write(self.project / ".venv" / "private-file", "local environment")
         self.write(self.project / ".env", "OPENROUTER_API_KEY=private-key")
+        self.write(self.project / ".streamlit/secrets.toml", 'OPENROUTER_API_KEY="private-key"')
         self.write(self.project / "src" / ".env.local", "OPENROUTER_API_KEY=private-key")
         self.write(self.project / "src" / "amlens" / "__pycache__" / "cache.pyc", "cache")
         report = self.bundle()
@@ -59,6 +60,7 @@ class BundleTests(unittest.TestCase):
             )
             self.assertIn("amlens-app/.env.example", archive.namelist())
             self.assertNotIn("amlens-app/.env", archive.namelist())
+            self.assertNotIn("amlens-app/.streamlit/secrets.toml", archive.namelist())
             self.assertNotIn("amlens-app/src/.env.local", archive.namelist())
             archive.extractall(relocated)
         extracted = relocated / "amlens-app"

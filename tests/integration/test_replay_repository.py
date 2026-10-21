@@ -14,6 +14,7 @@ from amlens.db.schema import create_observation_schema, finalize_observation_sch
 from amlens.services.case_service import ReplayDataset
 from amlens.services.dashboard_service import dashboard_snapshot
 from amlens.services.replay_service import initial_state
+from amlens.services.snapshot_service import export_replay_snapshot, read_replay_snapshot
 
 
 class ReplayRepositoryTests(unittest.TestCase):
@@ -43,6 +44,7 @@ class ReplayRepositoryTests(unittest.TestCase):
             signature = hashlib.sha256(json.dumps(manifest).encode()).hexdigest()
         with closing(create_results(self.detections)) as connection:
             set_metadata(connection, "status", "complete")
+            set_metadata(connection, "source_transactions", 2)
             set_metadata(connection, "observation_signature", signature)
             save_batch(
                 connection,
@@ -91,6 +93,36 @@ class ReplayRepositoryTests(unittest.TestCase):
             connection.commit()
         with self.assertRaisesRegex(ValueError, "different data version"):
             read_replay_records(self.observations, self.detections)
+
+    def test_export_preserves_replay_without_source_databases(self):
+        output = Path(self.temp.name) / "replay.json.gz"
+        original = ReplayDataset(read_replay_records(self.observations, self.detections))
+        report = export_replay_snapshot(self.observations, self.detections, output)
+        first_export = output.read_bytes()
+        export_replay_snapshot(self.observations, self.detections, output)
+        self.assertEqual(output.read_bytes(), first_export)
+        self.observations.unlink()
+        self.detections.unlink()
+        restored = read_replay_snapshot(output)
+        self.assertEqual(report["source_transactions"], 2)
+        self.assertEqual(original.fingerprint, restored.fingerprint)
+        for cursor in (original.start - 1, original.end):
+            state = initial_state(original, 0)
+            state["cursor"] = cursor
+            self.assertEqual(
+                dashboard_snapshot(original, state), dashboard_snapshot(restored, state)
+            )
+
+    def test_invalid_source_keeps_existing_snapshot(self):
+        output = Path(self.temp.name) / "replay.json.gz"
+        export_replay_snapshot(self.observations, self.detections, output)
+        before = output.read_bytes()
+        with closing(sqlite3.connect(self.detections)) as connection:
+            set_metadata(connection, "status", "running")
+            connection.commit()
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            export_replay_snapshot(self.observations, self.detections, output)
+        self.assertEqual(output.read_bytes(), before)
 
 
 if __name__ == "__main__":
