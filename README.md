@@ -15,7 +15,8 @@ Optional artificial intelligence (AI) examines case evidence and gives dashboard
 - Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 - Keep a minimum of **5 GB** of free disk space for source files, results, and temporary databases.
 
-The specified Python version in `.python-version` is **3.13.15**.
+The specified Python version in `.python-version` is **3.13**.
+The environment selects an available Python 3.13 patch release.
 uv uses this file to select the interpreter.
 An internet connection is necessary for the first dependency installation and data download.
 Use the commands below with Windows PowerShell, macOS, or Linux.
